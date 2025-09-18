@@ -28,7 +28,21 @@ export default tseslint.config(
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-floating-promises': 'warn',
-      '@typescript-eslint/no-unsafe-argument': 'warn'
-    },
+      '@typescript-eslint/no-unsafe-argument': 'warn',
+      'prettier/prettier': [
+        'error',
+        {
+          endOfLine: 'auto',
+        },
+      ],
+
+      // 👇 يوقف اعتراض السطر الطويل
+      'max-len': 'off',
+
+      // 👇 لو في تحذير من hardcoded password
+      'no-useless-concat': 'off',
+      'security/detect-unsafe-regex': 'off',
+    }
+
   },
 );

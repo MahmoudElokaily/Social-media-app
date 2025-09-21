@@ -22,22 +22,22 @@ export class AuthService {
     private jwtService: JwtService
   ) {}
   async signUp(signUpDto: SignUpDto) {
-    const {email , name , password } = signUpDto;
+    const {email , name , password , role } = signUpDto;
     const userByEmail = await this.userModel.findOne({ email });
     if (userByEmail) {
       throw new BadRequestException('Email already exists');
     }
     const hashedPassword = await bcrypt.hash(signUpDto.password, SALT);
-    const user = new this.userModel({email , name , password: hashedPassword});
+    const user = new this.userModel({email , name , password: hashedPassword , role});
     const saveUser = await user.save();
 
     // Generate JWT
-    const payload = { _id: saveUser._id , name , email  };
+    const payload = { _id: saveUser._id , name , email , role: saveUser.role };
     const accessToken = await this.jwtService.signAsync(payload);
     return { user: saveUser , accessToken };
   }
 
-  async signIp(signIpDto: SignIpDto) {
+  async signIn(signIpDto: SignIpDto) {
     const {email , password} = signIpDto;
     // get user with email
     const user = await this.userModel.findOne({ email });
@@ -50,7 +50,7 @@ export class AuthService {
       throw new NotFoundException('Bad Credentials');
     }
     // Generate JWT
-    const payload = { _id: user._id  , email  };
+    const payload = { _id: user._id  , email , role: user.role };
     const accessToken = await this.jwtService.signAsync(payload);
     return { user , accessToken };
   }

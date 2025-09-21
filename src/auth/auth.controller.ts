@@ -26,7 +26,7 @@ export class AuthController {
 
   @Post('sign-in')
   async signIn(@Body() signIpDto: SignIpDto) {
-    return this.authService.signIp(signIpDto);
+    return this.authService.signIn(signIpDto);
   }
 
   @Get()

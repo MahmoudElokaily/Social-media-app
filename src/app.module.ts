@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { ResourceModule } from './resource/resource.module';
+import { PostModule } from './post/post.module';
 
 @Module({
   imports: [
@@ -16,7 +17,7 @@ import { ResourceModule } from './resource/resource.module';
       useFactory: (configService: ConfigService) => ({
         uri: `mongodb+srv://${configService.get<string>('MONGO_USER')}:${configService.get<string>('MONGO_PASS')}@${configService.get<string>('MONGO_HOST')}/${configService.get<string>('MONGO_DB')}?retryWrites=true&w=majority&appName=Cluster0`,
       }),
-    }), UserModule, AuthModule, ResourceModule,
+    }), UserModule, AuthModule, ResourceModule, PostModule,
   ],
   controllers: [AppController],
   providers: [AppService],

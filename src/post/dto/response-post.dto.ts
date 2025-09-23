@@ -4,6 +4,7 @@ import { log } from 'node:util';
 import { UserDocument } from '../../user/schemas/user.schema';
 import { objectId } from '../../_cores/decorators/object-id.decorator';
 import { ResponseUserDto } from '../../user/dto/response-user.dto';
+import { MediaType } from '../schemas/post.schema';
 
 export class ResponsePostDto {
   @Expose()
@@ -14,7 +15,7 @@ export class ResponsePostDto {
   @Expose()
   content: string;
   @Expose()
-  mediaUrls: string[];
+  mediaFiles: MediaType[];
   @Expose()
   privacy: PostPrivacy;
   @Expose()
@@ -23,5 +24,5 @@ export class ResponsePostDto {
   updatedAt: Date;
   @Expose()
   @Type(() => ResponseUserDto)
-    author: ResponseUserDto;
+  author: ResponseUserDto;
 }

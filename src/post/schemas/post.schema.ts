@@ -5,6 +5,13 @@ import { PostPrivacy } from '../enums/post-privacy.enum';
 
 export type PostDocument = HydratedDocument<Post>;
 
+export class MediaType {
+  version: number;
+  public_id: string;
+  display_name: string;
+  format: string;
+  resource_type: string;
+}
 
 @Schema({timestamps: true})
 export class Post {
@@ -14,8 +21,8 @@ export class Post {
   backgroundColor: string;
   @Prop()
   content: string;
-  @Prop()
-  mediaUrls?: string[];
+  @Prop({default: []})
+  mediaFiles: MediaType[];
   @Prop({enum: PostPrivacy , default: PostPrivacy.PUBLIC})
   privacy: PostPrivacy;
 }

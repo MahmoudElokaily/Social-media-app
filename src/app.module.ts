@@ -7,6 +7,9 @@ import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { ResourceModule } from './resource/resource.module';
 import { PostModule } from './post/post.module';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { MulterModule } from '@nestjs/platform-express';
+import multer from 'multer';
 
 @Module({
   imports: [
@@ -17,7 +20,10 @@ import { PostModule } from './post/post.module';
       useFactory: (configService: ConfigService) => ({
         uri: `mongodb+srv://${configService.get<string>('MONGO_USER')}:${configService.get<string>('MONGO_PASS')}@${configService.get<string>('MONGO_HOST')}/${configService.get<string>('MONGO_DB')}?retryWrites=true&w=majority&appName=Cluster0`,
       }),
-    }), UserModule, AuthModule, ResourceModule, PostModule,
+    }), UserModule, AuthModule, ResourceModule, PostModule, CloudinaryModule,
+    MulterModule.register({
+      storage: multer.memoryStorage(), // ✅ عشان file.buffer يشتغل
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],

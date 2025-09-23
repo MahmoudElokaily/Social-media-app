@@ -3,8 +3,10 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Post } from './schemas/post.schema';
+import { MediaType, Post } from './schemas/post.schema';
 import { User } from '../user/schemas/user.schema';
+import { UploadMediaDto } from './dto/upload-media.dto';
+import { DeletePostDto } from './dto/delete-post.dto';
 
 @Injectable()
 export class PostService {
@@ -16,6 +18,22 @@ export class PostService {
   create(createPostDto: CreatePostDto , currentUser: IUserPayload) {
     const newPost =  new this.postModel({...createPostDto , author: currentUser});
     return newPost.save();
+  }
+
+  async uploadMeda(id: string, uploadMediaDto: UploadMediaDto[]) {
+    const post = await this.postModel.findById(id);
+    if (!post) throw new NotFoundException('Post not found');
+    uploadMediaDto.forEach((mediaDto) => {
+        post.mediaFiles.push(mediaDto);
+    })
+    return post.save();
+  }
+
+  async deleteMedia(id: string, deletePostDto: DeletePostDto) {
+    const post = await this.postModel.findById(id);
+    if (!post) throw new NotFoundException('Post not found');
+    post.mediaFiles = post.mediaFiles.filter((mediaFile) => mediaFile.public_id !== deletePostDto.mediaId);
+    return post.save();
   }
 
   async findAll() {

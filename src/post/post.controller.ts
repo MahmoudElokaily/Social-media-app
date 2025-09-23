@@ -19,6 +19,8 @@ import { CurrentUser } from '../_cores/decorators/current-user.decorator';
 import { Roles } from '../_cores/decorators/role.decorator';
 import { UserRole } from '../user/enums/user-role.enum';
 import { ParseObjectId } from '../_cores/pipes/parse-object-id';
+import { UploadMediaDto } from './dto/upload-media.dto';
+import { DeletePostDto } from './dto/delete-post.dto';
 
 @Controller('posts')
 @TransformDto(ResponsePostDto)
@@ -29,6 +31,20 @@ export class PostController {
   @Post()
   create(@Body() createPostDto: CreatePostDto, @CurrentUser() currentUser: IUserPayload) {
     return this.postService.create(createPostDto , currentUser);
+  }
+
+  @Patch(':id/upload')
+  uploadMedia(
+    @Param('id' , ParseObjectId) id: string,
+    @Body() uploadMediaDto: UploadMediaDto[]) {
+    return this.postService.uploadMeda(id , uploadMediaDto)
+  }
+
+  @Delete(':id/delete')
+  deleteMedia(
+    @Param('id' , ParseObjectId) id: string,
+    @Body() deletePostDto: DeletePostDto) {
+    return this.postService.deleteMedia(id , deletePostDto)
   }
 
   @Get()

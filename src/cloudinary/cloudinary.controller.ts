@@ -41,7 +41,6 @@ export class CloudinaryController {
       message: 'Success',
       data: result.map(r => {
         return {
-          url: r.secure_url,
           public_id: r.public_id,
           version: r.version,
           display_name: r.display_name,

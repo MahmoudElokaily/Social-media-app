@@ -3,7 +3,7 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { MediaType, Post } from './schemas/post.schema';
+import { Post } from './schemas/post.schema';
 import { User } from '../user/schemas/user.schema';
 import { UploadMediaDto } from './dto/upload-media.dto';
 import { DeletePostDto } from './dto/delete-post.dto';
@@ -36,12 +36,24 @@ export class PostService {
     return post.save();
   }
 
-  async findAll() {
+  async findAll(limit: number, cursor: string) {
+    const query: Record<string, object> = {};
+    if (cursor) {
+      query.createdAt = { $lt: new Date(cursor) }
+    }
     const posts = await this.postModel
-      .find()
+      .find(query)
       .populate('author')
-    return posts;
-
+      .sort({ createdAt: -1 })
+      .limit(limit + 1)
+      .lean()
+    const hasNextPage = posts.length > limit;
+    const items = hasNextPage ? posts.slice(0 , limit) : posts;
+    return {
+      items: items,
+      hasNextPage,
+      cursor: hasNextPage ? items[items.length - 1].createdAt : null,
+    };
   }
 
   findOne(id: string) {

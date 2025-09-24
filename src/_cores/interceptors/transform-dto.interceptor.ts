@@ -24,6 +24,16 @@ export class TransformDtoInterceptor implements NestInterceptor {
       .handle()
       .pipe(
         map((data) => {
+          if (Object.prototype.hasOwnProperty.call(data , 'hasNextPage')) {
+            const {items , hasNextPage , cursor} = data;
+            return {
+              message: "Success",
+              items: plainToInstance(this.dtoclass , items , {excludeExtraneousValues: true}),
+              hasNextPage,
+              cursor,
+            }
+          }
+
           const {user , accessToken } = data;
           if (isAuthenticationUrl) {
             return {

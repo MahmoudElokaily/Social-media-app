@@ -2,16 +2,12 @@ import mongoose, { HydratedDocument } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import type { UserDocument } from '../../user/schemas/user.schema';
 import { PostPrivacy } from '../enums/post-privacy.enum';
+import { MediaType } from '../dto/response-post.dto';
+
 
 export type PostDocument = HydratedDocument<Post>;
 
-export class MediaType {
-  version: number;
-  public_id: string;
-  display_name: string;
-  format: string;
-  resource_type: string;
-}
+
 
 @Schema({timestamps: true})
 export class Post {
@@ -25,6 +21,8 @@ export class Post {
   mediaFiles: MediaType[];
   @Prop({enum: PostPrivacy , default: PostPrivacy.PUBLIC})
   privacy: PostPrivacy;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 

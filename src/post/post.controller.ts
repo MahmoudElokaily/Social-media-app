@@ -7,6 +7,8 @@ import {
   Param,
   Delete,
   UseGuards,
+  ParseIntPipe,
+  Query, DefaultValuePipe,
 } from '@nestjs/common';
 import { PostService } from './post.service';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -48,8 +50,8 @@ export class PostController {
   }
 
   @Get()
-  findAll() {
-    return this.postService.findAll();
+  findAll(@Query('limit' ,new DefaultValuePipe(10) ,ParseIntPipe) limit: number, @Query('cursor') cursor: string) {
+    return this.postService.findAll(limit , cursor);
   }
 
   @Get(':id')

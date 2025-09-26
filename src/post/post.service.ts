@@ -4,15 +4,17 @@ import { UpdatePostDto } from './dto/update-post.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Post } from './schemas/post.schema';
-import { User } from '../user/schemas/user.schema';
 import { UploadMediaDto } from './dto/upload-media.dto';
 import { DeletePostDto } from './dto/delete-post.dto';
+import { AddReactionDto } from './dto/add-reaction.dto';
+import { ReactionService } from '../reaction/reaction.service';
+import { ReactionType } from '../_cores/globals/enum';
 
 @Injectable()
 export class PostService {
   constructor(
     @InjectModel(Post.name) private postModel: Model<Post>,
-    @InjectModel(User.name) private userModel: Model<User>,
+    private readonly reactionService: ReactionService,
   ) {
   }
   create(createPostDto: CreatePostDto , currentUser: IUserPayload) {
@@ -56,8 +58,10 @@ export class PostService {
     };
   }
 
-  findOne(id: string) {
-    return this.postModel.findById(id).populate('author');
+  async findOne(id: string) {
+    const post = await this.postModel.findById(id).populate('author');
+    if (!post) throw new NotFoundException('Post not found');
+    return post;
   }
 
   async update(id: string, updatePostDto: UpdatePostDto) {
@@ -73,4 +77,44 @@ export class PostService {
     if (!post) throw new NotFoundException('Post not found');
     return post;
   }
+
+  async addReaction(addReactionDto: AddReactionDto, currentUser: IUserPayload) {
+    const { postId, type } = addReactionDto;
+    const post = await this.findOne(postId);
+    const existingReaction = await this.reactionService.findExisting(postId, currentUser._id);
+
+    let oldReactionsType: ReactionType | null = null;
+
+    if (existingReaction) {
+      // لو نفس التفاعل مفيش داعي نعمل حاجة
+      if (type === existingReaction.type) {
+        return post;
+      }
+
+      oldReactionsType = existingReaction.type;
+      await this.reactionService.update(existingReaction._id.toString(), type);
+    } else {
+      await this.reactionService.create(addReactionDto, currentUser);
+    }
+
+    // نتأكد إن reactionCounts موجودة
+    if (!post.reactionCounts) {
+      post.reactionCounts = {} as Record<ReactionType, number>;
+    }
+
+    // لو فيه تفاعل قديم: نقص واحد
+    if (oldReactionsType !== null) {
+      const oldValue = post.reactionCounts[oldReactionsType] || 0;
+      post.reactionCounts[oldReactionsType] = oldValue > 0 ? oldValue - 1 : 0;
+    }
+
+    // نزود واحد على التفاعل الجديد
+    const newValue = post.reactionCounts[type] || 0;
+    post.reactionCounts[type] = newValue + 1;
+
+    await post.save();
+
+    return post;
+  }
+
 }

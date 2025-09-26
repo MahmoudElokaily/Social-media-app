@@ -2,6 +2,7 @@ import { PostPrivacy } from '../enums/post-privacy.enum';
 import { Expose, Transform, Type } from 'class-transformer';
 import { objectId } from '../../_cores/decorators/object-id.decorator';
 import { ResponseUserDto } from '../../user/dto/response-user.dto';
+import { ReactionType } from 'src/_cores/globals/enum';
 
 export class MediaType {
   @Expose()
@@ -33,6 +34,8 @@ export class ResponsePostDto {
   @Expose()
   @Type(() => MediaType)
   mediaFiles: MediaType[];
+  @Expose()
+  reactionCounts: Map<ReactionType, number>;
   @Expose()
   privacy: PostPrivacy;
   @Expose()

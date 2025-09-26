@@ -5,10 +5,12 @@ import { UserModule } from '../user/user.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Post, PostSchema } from './schemas/post.schema';
 import { User, UserSchema } from '../user/schemas/user.schema';
+import { ReactionModule } from '../reaction/reaction.module';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Post.name, schema: PostSchema } ,  { name: User.name, schema: UserSchema },]),
+    MongooseModule.forFeature([{ name: Post.name, schema: PostSchema }]),
+    ReactionModule,
   ],
   controllers: [PostController],
   providers: [PostService],

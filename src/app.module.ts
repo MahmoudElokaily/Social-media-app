@@ -9,6 +9,7 @@ import { ResourceModule } from './resource/resource.module';
 import { PostModule } from './post/post.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { MulterModule } from '@nestjs/platform-express';
+import { ReactionModule } from './reaction/reaction.module';
 import multer from 'multer';
 
 @Module({
@@ -24,6 +25,7 @@ import multer from 'multer';
     MulterModule.register({
       storage: multer.memoryStorage(), // ✅ عشان file.buffer يشتغل
     }),
+    ReactionModule,
   ],
   controllers: [AppController],
   providers: [AppService],

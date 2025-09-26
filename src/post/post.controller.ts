@@ -23,6 +23,7 @@ import { UserRole } from '../user/enums/user-role.enum';
 import { ParseObjectId } from '../_cores/pipes/parse-object-id';
 import { UploadMediaDto } from './dto/upload-media.dto';
 import { DeletePostDto } from './dto/delete-post.dto';
+import { AddReactionDto } from './dto/add-reaction.dto';
 
 @Controller('posts')
 @TransformDto(ResponsePostDto)
@@ -33,6 +34,11 @@ export class PostController {
   @Post()
   create(@Body() createPostDto: CreatePostDto, @CurrentUser() currentUser: IUserPayload) {
     return this.postService.create(createPostDto , currentUser);
+  }
+
+  @Post('reaction')
+  addReaction(@Body() addReactionDto: AddReactionDto, @CurrentUser() currentUser: IUserPayload) {
+    return this.postService.addReaction(addReactionDto , currentUser);
   }
 
   @Patch(':id/upload')

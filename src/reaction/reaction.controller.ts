@@ -15,9 +15,4 @@ export class ReactionController {
   findOne(@Param('id') id: string) {
     return this.reactionService.findOne(+id);
   }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.reactionService.remove(+id);
-  }
 }

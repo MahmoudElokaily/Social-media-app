@@ -1,11 +1,11 @@
-import mongoose, { HydratedDocument } from 'mongoose';
+import mongoose, { HydratedDocument, Types } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import type { UserDocument } from '../../user/schemas/user.schema';
 import { PostPrivacy } from '../enums/post-privacy.enum';
 import { MediaType } from '../dto/response-post.dto';
 import { ReactionType } from '../../_cores/globals/enum';
 
-
+  
 export type PostDocument = HydratedDocument<Post>;
 
 
@@ -20,8 +20,8 @@ export class Post {
   content: string;
   @Prop({default: []})
   mediaFiles: MediaType[];
-  @Prop({type: Object , default: {}})
-  reactionCounts: Record<ReactionType, number>;
+  @Prop({ type: Map, of: Number, default: {} })
+  reactionCounts: Map<ReactionType, number>;
   @Prop({enum: PostPrivacy , default: PostPrivacy.PUBLIC})
   privacy: PostPrivacy;
   createdAt: Date;

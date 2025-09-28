@@ -35,6 +35,7 @@ export class ResponsePostDto {
   @Type(() => MediaType)
   mediaFiles: MediaType[];
   @Expose()
+  @Transform(({ obj }) => obj.reactionCounts)
   reactionCounts: Map<ReactionType, number>;
   @Expose()
   privacy: PostPrivacy;
@@ -45,4 +46,6 @@ export class ResponsePostDto {
   @Expose()
   @Type(() => ResponseUserDto)
   author: ResponseUserDto;
+  @Expose()
+  myReaction: ReactionType;
 }

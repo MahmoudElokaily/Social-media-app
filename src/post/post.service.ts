@@ -9,6 +9,8 @@ import { DeletePostDto } from './dto/delete-post.dto';
 import { AddReactionDto } from './dto/add-reaction.dto';
 import { ReactionService } from '../reaction/reaction.service';
 import { ReactionType } from '../_cores/globals/enum';
+import { RemoveReactionDto } from './dto/remove-reaction.dto';
+import { log } from 'node:util';
 
 @Injectable()
 export class PostService {
@@ -38,7 +40,7 @@ export class PostService {
     return post.save();
   }
 
-  async findAll(limit: number, cursor: string) {
+  async findAll(currentUser: IUserPayload , limit: number, cursor: string) {
     const query: Record<string, object> = {};
     if (cursor) {
       query.createdAt = { $lt: new Date(cursor) }
@@ -51,17 +53,28 @@ export class PostService {
       .lean()
     const hasNextPage = posts.length > limit;
     const items = hasNextPage ? posts.slice(0 , limit) : posts;
+    const itemsWithReactions = await Promise.all(items.map(async (item) => {
+        const myReaction = await this.reactionService.findExisting(item._id.toString() , currentUser._id.toString()).lean();
+        return {...item , myReaction: myReaction?.type};
+    }) );
     return {
-      items: items,
+      items: itemsWithReactions,
       hasNextPage,
       cursor: hasNextPage ? items[items.length - 1].createdAt : null,
     };
   }
 
-  async findOne(id: string) {
+  private async findOne(id: string) {
     const post = await this.postModel.findById(id).populate('author');
     if (!post) throw new NotFoundException('Post not found');
     return post;
+  }
+
+  async findOneWithMyReaction(id: string,currentUser: IUserPayload) {
+    const post = await this.postModel.findById(id).populate('author').lean();
+    if (!post) throw new NotFoundException('Post not found');
+    const myReaction = await this.reactionService.findExisting(post._id.toString() , currentUser._id.toString());
+    return {...post , myReaction: myReaction?.type};
   }
 
   async update(id: string, updatePostDto: UpdatePostDto) {
@@ -99,22 +112,29 @@ export class PostService {
 
     // نتأكد إن reactionCounts موجودة
     if (!post.reactionCounts) {
-      post.reactionCounts = {} as Record<ReactionType, number>;
+      post.reactionCounts = new Map<ReactionType, number>();
     }
 
     // لو فيه تفاعل قديم: نقص واحد
     if (oldReactionsType !== null) {
-      const oldValue = post.reactionCounts[oldReactionsType] || 0;
-      post.reactionCounts[oldReactionsType] = oldValue > 0 ? oldValue - 1 : 0;
+      const oldValue = post.reactionCounts.get(oldReactionsType) || 0;
+      post.reactionCounts.set(oldReactionsType, Math.max(oldValue - 1, 0));
     }
 
     // نزود واحد على التفاعل الجديد
-    const newValue = post.reactionCounts[type] || 0;
-    post.reactionCounts[type] = newValue + 1;
+    const newValue = post.reactionCounts.get(type) || 0;
+    post.reactionCounts.set(type, newValue + 1);
 
-    await post.save();
+    return post.save();
+  }
 
-    return post;
+  async removeReaction(removeReactionDto: RemoveReactionDto , currentUser: IUserPayload) {
+    const { postId } = removeReactionDto;
+    const post = await this.findOne(postId);
+    const existingReaction = await this.reactionService.findExisting(postId, currentUser._id);
+    if (!existingReaction) return;
+    await this.reactionService.remove(existingReaction._id.toString());
+    return this.postModel.findByIdAndUpdate(post._id , { $inc: { [`reactionCounts.${existingReaction.type}`]: -1 }, } , { new: true });
   }
 
 }

@@ -1,4 +1,3 @@
-import { PostPrivacy } from '../enums/post-privacy.enum';
 import { IsEnum, IsMongoId, IsNotEmpty } from 'class-validator';
 import { ReactionType } from '../../_cores/globals/enum';
 

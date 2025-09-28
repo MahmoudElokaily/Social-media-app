@@ -24,12 +24,19 @@ import { ParseObjectId } from '../_cores/pipes/parse-object-id';
 import { UploadMediaDto } from './dto/upload-media.dto';
 import { DeletePostDto } from './dto/delete-post.dto';
 import { AddReactionDto } from './dto/add-reaction.dto';
+import { RemoveReactionDto } from './dto/remove-reaction.dto';
+import { ParseObjectIdPipe } from '@nestjs/mongoose';
 
 @Controller('posts')
 @TransformDto(ResponsePostDto)
 @UseGuards(AuthGuard , RoleGuard)
 export class PostController {
   constructor(private readonly postService: PostService) {}
+
+  @Delete('reaction')
+  removeReaction(@Body() removeReactionDto: RemoveReactionDto, @CurrentUser() currentUser: IUserPayload) {
+    return this.postService.removeReaction(removeReactionDto , currentUser);
+  }
 
   @Post()
   create(@Body() createPostDto: CreatePostDto, @CurrentUser() currentUser: IUserPayload) {
@@ -40,6 +47,7 @@ export class PostController {
   addReaction(@Body() addReactionDto: AddReactionDto, @CurrentUser() currentUser: IUserPayload) {
     return this.postService.addReaction(addReactionDto , currentUser);
   }
+
 
   @Patch(':id/upload')
   uploadMedia(
@@ -56,13 +64,13 @@ export class PostController {
   }
 
   @Get()
-  findAll(@Query('limit' ,new DefaultValuePipe(10) ,ParseIntPipe) limit: number, @Query('cursor') cursor: string) {
-    return this.postService.findAll(limit , cursor);
+  findAll(@CurrentUser() currentUser: IUserPayload,@Query('limit' ,new DefaultValuePipe(10) ,ParseIntPipe) limit: number, @Query('cursor') cursor: string) {
+    return this.postService.findAll(currentUser , limit , cursor);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.postService.findOne(id);
+  findOne(@Param('id' , ParseObjectIdPipe) id: string,@CurrentUser() currentUser: IUserPayload) {
+    return this.postService.findOneWithMyReaction(id , currentUser);
   }
 
   @Patch(':id')

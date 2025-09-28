@@ -24,6 +24,9 @@ export class TransformDtoInterceptor implements NestInterceptor {
       .handle()
       .pipe(
         map((data) => {
+          if (data === null || data === undefined) {
+            return { message: 'Success' };
+          }
           if (Object.prototype.hasOwnProperty.call(data , 'hasNextPage')) {
             const {items , hasNextPage , cursor} = data;
             return {

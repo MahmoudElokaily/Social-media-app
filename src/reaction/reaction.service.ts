@@ -38,7 +38,9 @@ export class ReactionService {
     return reaction;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} reaction`;
+  async remove(id: string) {
+    const reaction =  await this.reactionModel.findByIdAndDelete(id);
+    if (!reaction) throw new NotFoundException('Reaction does not exist');
+    return reaction;
   }
 }

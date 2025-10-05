@@ -10,7 +10,6 @@ import { AddReactionDto } from './dto/add-reaction.dto';
 import { ReactionService } from '../reaction/reaction.service';
 import { ReactionType } from '../_cores/globals/enum';
 import { RemoveReactionDto } from './dto/remove-reaction.dto';
-import { log } from 'node:util';
 
 @Injectable()
 export class PostService {
@@ -64,7 +63,7 @@ export class PostService {
     };
   }
 
-  private async findOne(id: string) {
+  async findOne(id: string) {
     const post = await this.postModel.findById(id).populate('author');
     if (!post) throw new NotFoundException('Post not found');
     return post;
@@ -127,6 +126,7 @@ export class PostService {
 
     return post.save();
   }
+
 
   async removeReaction(removeReactionDto: RemoveReactionDto , currentUser: IUserPayload) {
     const { postId } = removeReactionDto;

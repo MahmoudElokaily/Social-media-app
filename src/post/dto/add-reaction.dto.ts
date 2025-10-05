@@ -7,5 +7,5 @@ export class AddReactionDto {
   postId: string;
   @IsNotEmpty()
   @IsEnum(ReactionType)
-  type: ReactionType
+  type: ReactionType;
 }

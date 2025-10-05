@@ -14,5 +14,6 @@ import { ReactionModule } from '../reaction/reaction.module';
   ],
   controllers: [PostController],
   providers: [PostService],
+  exports: [PostService],
 })
 export class PostModule {}

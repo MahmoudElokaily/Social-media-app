@@ -10,6 +10,7 @@ import { PostModule } from './post/post.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { ReactionModule } from './reaction/reaction.module';
+import { CommentModule } from './comment/comment.module';
 import multer from 'multer';
 
 @Module({
@@ -26,6 +27,7 @@ import multer from 'multer';
       storage: multer.memoryStorage(), // ✅ عشان file.buffer يشتغل
     }),
     ReactionModule,
+    CommentModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -2,8 +2,8 @@ import mongoose, { HydratedDocument, Types } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import type { UserDocument } from '../../user/schemas/user.schema';
 import { PostPrivacy } from '../enums/post-privacy.enum';
-import { MediaType } from '../dto/response-post.dto';
 import { ReactionType } from '../../_cores/globals/enum';
+import { MediaType } from '../../_cores/dto/media-type.dto';
 
   
 export type PostDocument = HydratedDocument<Post>;

@@ -6,6 +6,7 @@ declare global {
     name: string;
     email: string;
     role: string;
+    isActive: boolean;
   }
 
   namespace Express {
@@ -14,3 +15,11 @@ declare global {
     }
   }
 }
+
+// export class MediaType {
+//   public_id: string;
+//   version: string;
+//   display_name: string;
+//   format: string;
+//   resource_type: string;
+// }

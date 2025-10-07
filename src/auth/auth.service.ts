@@ -32,7 +32,13 @@ export class AuthService {
     const saveUser = await user.save();
 
     // Generate JWT
-    const payload = { _id: saveUser._id , name , email , role: saveUser.role };
+    const payload = {
+      _id: saveUser._id,
+      name,
+      email,
+      role: saveUser.role,
+      isActive: saveUser.isActive,
+    };
     const accessToken = await this.jwtService.signAsync(payload);
     return { user: saveUser , accessToken };
   }
@@ -41,7 +47,7 @@ export class AuthService {
     const {email , password} = signIpDto;
     // get user with email
     const user = await this.userModel.findOne({ email });
-     if (!user) {
+     if (!user || !user.isActive) {
       throw new NotFoundException('Bad Credentials');
     }
     // check password
@@ -50,7 +56,11 @@ export class AuthService {
       throw new NotFoundException('Bad Credentials');
     }
     // Generate JWT
-    const payload = { _id: user._id  , email , role: user.role };
+    const payload = {
+      _id:      user._id,
+      email,
+      role:     user.role,
+      isActive: user.isActive };
     const accessToken = await this.jwtService.signAsync(payload);
     return { user , accessToken };
   }

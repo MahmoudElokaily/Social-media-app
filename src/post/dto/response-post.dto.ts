@@ -3,25 +3,7 @@ import { Expose, Transform, Type } from 'class-transformer';
 import { objectId } from '../../_cores/decorators/object-id.decorator';
 import { ResponseUserDto } from '../../user/dto/response-user.dto';
 import { ReactionType } from 'src/_cores/globals/enum';
-
-export class MediaType {
-  @Expose()
-  @Transform(
-    ({ obj }) =>
-      `https://res.cloudinary.com/${process.env.CLOUDINARY_NAME}/image/upload/v${obj.version}/${obj.display_name}.${obj.format}`)
-  url: string;
-  @Expose()
-  version: number;
-  @Expose()
-  public_id: string;
-  @Expose()
-  display_name: string;
-  @Expose()
-  format: string;
-  @Expose()
-  resource_type: string;
-}
-
+import { MediaType } from '../../_cores/dto/media-type.dto';
 
 export class ResponsePostDto {
   @Expose()

@@ -21,11 +21,11 @@ import { CurrentUser } from '../_cores/decorators/current-user.decorator';
 import { Roles } from '../_cores/decorators/role.decorator';
 import { UserRole } from '../user/enums/user-role.enum';
 import { ParseObjectId } from '../_cores/pipes/parse-object-id';
-import { UploadMediaDto } from './dto/upload-media.dto';
 import { DeletePostDto } from './dto/delete-post.dto';
 import { AddReactionDto } from './dto/add-reaction.dto';
 import { RemoveReactionDto } from './dto/remove-reaction.dto';
 import { ParseObjectIdPipe } from '@nestjs/mongoose';
+import { UploadMediaDto } from '../_cores/dto/upload-media.dto';
 
 @Controller('posts')
 @TransformDto(ResponsePostDto)

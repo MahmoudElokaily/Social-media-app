@@ -11,6 +11,7 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { ReactionModule } from './reaction/reaction.module';
 import { CommentModule } from './comment/comment.module';
+import { FriendModule } from './friend/friend.module';
 import multer from 'multer';
 
 @Module({
@@ -28,6 +29,7 @@ import multer from 'multer';
     }),
     ReactionModule,
     CommentModule,
+    FriendModule,
   ],
   controllers: [AppController],
   providers: [AppService],

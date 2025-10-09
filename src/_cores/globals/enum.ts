@@ -6,3 +6,9 @@ export enum ReactionType {
   Haha = "haha",
   Happy = "happy",
 }
+
+export enum FriendRequestType {
+  Accept = "accepted",
+  Reject = "rejected",
+  Pending = "pending",
+}

@@ -14,10 +14,6 @@ export class ResponseUserDto {
   role: string;
   @Expose()
   bio: string;
-  // @Expose()
-  // avatar: MediaType;
-  // @Expose()
-  // coverPhoto: MediaType;
   @Expose()
   birthdate: Date;
   @Expose()

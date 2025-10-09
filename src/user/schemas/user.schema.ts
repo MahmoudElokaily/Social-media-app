@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import mongoose, { HydratedDocument } from 'mongoose';
 import { UserRole } from '../enums/user-role.enum';
 import { MediaType } from '../../_cores/dto/media-type.dto';
 
@@ -25,6 +25,8 @@ export class User {
   birthdate?: Date;
   @Prop()
   phoneNumber?: string;
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' , default: [] })
+  friends: UserDocument[];
   @Prop({ default: true })
   isActive: boolean;
 }

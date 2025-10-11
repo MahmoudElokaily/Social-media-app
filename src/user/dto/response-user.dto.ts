@@ -1,6 +1,5 @@
 import { Expose, Transform } from 'class-transformer';
 import { objectId } from '../../_cores/decorators/object-id.decorator';
-import { MediaType } from '../../_cores/dto/media-type.dto';
 
 export class ResponseUserDto {
   @Expose()
@@ -19,11 +18,13 @@ export class ResponseUserDto {
   @Expose()
   phoneNumber: string;
   @Expose()
-  @Transform(({ obj }) => obj.avatar?.url)
+  @Transform(({ obj }) => obj.avatar?.public_id ? obj.avatar?.url : null)
   avaterUrl: string;
   @Expose()
-  @Transform(({ obj }) => obj.coverPhoto?.url)
+  @Transform(({ obj }) => obj.coverPhoto?.public_id ? obj.coverPhoto?.url : null )
   coverPhotoUrl: string;
   @Expose()
   isActive: boolean;
+  @Expose()
+  friends: ResponseUserDto[];
 }

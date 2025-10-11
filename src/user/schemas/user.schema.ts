@@ -25,7 +25,7 @@ export class User {
   birthdate?: Date;
   @Prop()
   phoneNumber?: string;
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' , default: [] })
+  @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: 'User' })
   friends: UserDocument[];
   @Prop({ default: true })
   isActive: boolean;

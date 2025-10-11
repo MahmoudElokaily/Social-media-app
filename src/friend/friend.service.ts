@@ -4,7 +4,6 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { UpdateFriendDto } from './dto/update-friend.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { FriendRequest } from './schemas/friend-request.schema';
 import { Model } from 'mongoose';
@@ -65,17 +64,20 @@ export class FriendService {
 
   }
 
-  findAll() {
-    return `This action returns all friend`;
+   getCurrentRequestPending(currentUser: IUserPayload) {
+    return this.friendModel.find({
+      receiver: currentUser._id,
+      status: FriendRequestType.Pending
+    }).populate([
+      { path: 'sender' , select: 'name email avatar' },
+      { path: 'receiver' , select: 'name email avatar'},
+    ]);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} friend`;
+  getCurrentFriends(currentUser: IUserPayload) {
+    return this.userService.getFriends(currentUser._id);
   }
 
-  update(id: number, updateFriendDto: UpdateFriendDto) {
-    return `This action updates a #${id} friend`;
-  }
 
   async remove(currentUser: IUserPayload , receiverId: string) {
     const receiver = await this.userService.findOne(receiverId);

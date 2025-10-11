@@ -12,8 +12,30 @@ export class UserService {
   ) {
   }
 
-  findAll() {
-    return this.userModel.find({isActive: true});
+  async findAll(q: string , limit: number , cursor: string) {
+    const query: Record<string, any> = { isActive: true };
+    if (q) {
+      query.$or = [
+        {name: { $regex: q, $options: 'i' }},
+        {email: { $regex: q, $options: 'i' }}
+      ];
+    }
+    if (cursor) {
+      query.email = { $gt: cursor };
+    }
+
+    const users = await this.userModel.find(query)
+      .sort({ email : 1 })
+      .limit(limit + 1)
+      .lean()
+
+    const hasNextPage = users.length > limit;
+    const items = hasNextPage ? users.slice(0 , limit) : users;
+    return {
+      items: items,
+      hasNextPage,
+      cursor: hasNextPage ? items[items.length - 1].email : null,
+    };
   }
 
   async getCurrentUser(currentUser: IUserPayload) {
@@ -65,5 +87,11 @@ export class UserService {
       $addToSet: { friends: FriendId },
     }
     );
+  }
+
+  async getFriends(userId: string) {
+    const user = await this.userModel.findById(userId).populate('friends');
+    if (!user) throw new NotFoundException('User not found');
+    return user.friends;
   }
 }

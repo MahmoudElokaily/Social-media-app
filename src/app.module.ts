@@ -12,6 +12,8 @@ import { MulterModule } from '@nestjs/platform-express';
 import { ReactionModule } from './reaction/reaction.module';
 import { CommentModule } from './comment/comment.module';
 import { FriendModule } from './friend/friend.module';
+import { ConversationModule } from './conversation/conversation.module';
+import { MessageModule } from './message/message.module';
 import multer from 'multer';
 
 @Module({
@@ -30,6 +32,8 @@ import multer from 'multer';
     ReactionModule,
     CommentModule,
     FriendModule,
+    ConversationModule,
+    MessageModule,
   ],
   controllers: [AppController],
   providers: [AppService],

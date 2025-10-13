@@ -1,0 +1,102 @@
+import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  CreateGroupConversationDto,
+} from './dto/create-group-conversation.dto';
+import { UpdateConversationDto } from './dto/update-conversation.dto';
+import { CreatePrivateConversationDto } from './dto/create-private-conversation.dto';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { Conversation } from './schemas/conversation.schema';
+import { UserService } from '../user/user.service';
+
+@Injectable()
+export class ConversationService {
+  constructor(
+    @InjectModel(Conversation.name) private conversationModel: Model<Conversation>,
+    private readonly userService: UserService,
+  ) {
+  }
+  async createPrivate(
+    createPrivateConversationDto: CreatePrivateConversationDto,
+    currentUser: IUserPayload
+  ) {
+    const { participantsId } = createPrivateConversationDto;
+    const existingConversation = await this.conversationModel.findOne({
+      isGroup: false,
+      participants: {$all: [currentUser._id , participantsId]}
+    });
+
+    if (existingConversation) return existingConversation;
+
+    const user = await this.userService.findOne(participantsId);
+
+    const conversation = new this.conversationModel({
+      isGroup: false,
+      participants: [currentUser._id , participantsId],
+      // owner: currentUser._id
+    });
+
+    return conversation.save();
+  }
+
+  async createGroup(createGroupConversationDto: CreateGroupConversationDto , currentUser: IUserPayload) {
+    const { groupName , groupAvatar , participantsIds } = createGroupConversationDto;
+
+    const users = await this.userService.findUsersByIds(participantsIds);
+
+    if (users.length !== participantsIds.length) {
+      throw new NotFoundException('Some users not found');
+    }
+
+    const conversation = new this.conversationModel({
+      isGroup: true,
+      participants: [currentUser._id , ...participantsIds],
+      groupName,
+      groupAvatar,
+      groupOwner: currentUser._id
+    });
+
+    return conversation.save();
+  }
+
+  async findAll(currentUser: IUserPayload ,  limit: number , cursor: string) {
+    const query: Record<string, any> = {
+      participants: {$in: [currentUser._id]},
+    };
+
+    if (cursor) {
+      query.updatedAt = { $lt: new Date(cursor) };
+    }
+
+    const conversations = await this.conversationModel.find(query)
+      .sort({updatedAt: -1})
+      .limit(limit + 1)
+      .populate('groupOwner' , 'name email')
+      .populate('participants')
+      .lean();
+
+    const hasNextPage = conversations.length > limit;
+    const items = hasNextPage ? conversations.slice(0 , limit) : conversations;
+
+    return {
+      items,
+      hasNextPage,
+      cursor: hasNextPage ? items[items.length - 1].updatedAt : null,
+    }
+  }
+
+  async findOne(id: string) {
+    const conversation = await this.conversationModel.findById(id)
+      .populate('participants')
+    if (!conversation) throw new NotFoundException('Conversation not found');
+    return conversation;
+  }
+
+  update(id: number, updateConversationDto: UpdateConversationDto) {
+    return `This action updates a #${id} conversation`;
+  }
+
+  remove(id: number) {
+    return `This action removes a #${id} conversation`;
+  }
+}

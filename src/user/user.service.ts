@@ -94,4 +94,8 @@ export class UserService {
     if (!user) throw new NotFoundException('User not found');
     return user.friends;
   }
+
+  findUsersByIds(ids: string[]) {
+    return this.userModel.find({ _id: { $in: ids } });
+  }
 }

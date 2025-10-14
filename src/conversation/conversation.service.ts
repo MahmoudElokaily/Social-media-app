@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   CreateGroupConversationDto,
 } from './dto/create-group-conversation.dto';
@@ -8,6 +13,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Conversation } from './schemas/conversation.schema';
 import { UserService } from '../user/user.service';
+import { AddParticipantsDto } from './dto/add-participants.dto';
 
 @Injectable()
 export class ConversationService {
@@ -92,11 +98,57 @@ export class ConversationService {
     return conversation;
   }
 
-  update(id: number, updateConversationDto: UpdateConversationDto) {
-    return `This action updates a #${id} conversation`;
+  async update(id: string, updateConversationDto: UpdateConversationDto , currentUser: IUserPayload) {
+    const {groupName, groupAvatar} = updateConversationDto;
+    const conversation = await this.conversationModel.findById(id);
+    if (!conversation) throw new NotFoundException('Conversation not found');
+    if (currentUser._id !== conversation.groupOwner?._id.toString())  throw new ForbiddenException();
+    conversation.groupAvatar = groupAvatar || conversation.groupAvatar;
+    conversation.groupName = groupName || conversation.groupName;
+    return  conversation.save();
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} conversation`;
+  async addParticipants(id: string,currentUser: IUserPayload , addParticipantsDto: AddParticipantsDto) {
+    const { participantIds } = addParticipantsDto;
+    const conversation = await this.findOne(id);
+    if (!conversation.isGroup) throw new BadRequestException('add participants should be in group conversation only');
+
+    if (conversation.groupOwner?._id.toString() !== currentUser._id) throw new ForbiddenException();
+
+    const participants = await this.userService.findUsersByIds(participantIds);
+    if (participants.length !== participantIds.length) {
+      throw new NotFoundException('Some users not found');
+    }
+    const existingIds = conversation.participants.map(p => p._id.toString());
+    const newParticipants = participants.filter(
+      user => !existingIds.includes(user._id.toString())
+    );
+    if (newParticipants.length === 0) {
+      throw new BadRequestException('All participants already exist in conversation');
+    }
+    conversation.participants.push(...newParticipants);
+    await conversation.save();
+  }
+
+  async removeParticipants(id: string,currentUser: IUserPayload , removeParticipantsDto: AddParticipantsDto) {
+    const { participantIds } = removeParticipantsDto;
+    const conversation = await this.findOne(id);
+    if (!conversation.isGroup) throw new BadRequestException('add participants should be in group conversation only');
+
+    if (conversation.groupOwner?._id.toString() !== currentUser._id) throw new ForbiddenException();
+
+    if (participantIds.includes(conversation.groupOwner?._id.toString())) throw new BadRequestException("Can't remove owner");
+
+    const filteredParticipants = conversation.participants.filter(p => !participantIds.includes(p._id.toString()));
+
+    conversation.participants = filteredParticipants;
+    await conversation.save();
+  }
+
+  async remove(id: string , currentUser: IUserPayload) {
+    const conversation = await this.findOne(id);
+    if (conversation.isGroup && conversation.groupOwner?._id.toString() !== currentUser._id) throw new ForbiddenException();
+    await conversation.deleteOne();
+    // TODO Delete all message in this conversation
   }
 }

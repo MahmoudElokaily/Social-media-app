@@ -20,6 +20,7 @@ import { CreateGroupConversationDto } from './dto/create-group-conversation.dto'
 import { TransformDto } from '../_cores/interceptors/transform-dto.interceptor';
 import { ResponseConversationDto } from './dto/response-conversation.dto';
 import { ParseObjectIdPipe } from '@nestjs/mongoose';
+import { AddParticipantsDto } from './dto/add-participants.dto';
 
 @Controller('conversations')
 @UseGuards(AuthGuard)
@@ -52,12 +53,21 @@ export class ConversationController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateConversationDto: UpdateConversationDto) {
-    return this.conversationService.update(+id, updateConversationDto);
+  update(@Param('id', ParseObjectIdPipe) id: string, @Body() updateConversationDto: UpdateConversationDto , @CurrentUser() currentUser: IUserPayload ,) {
+    return this.conversationService.update(id, updateConversationDto , currentUser);
+  }
+
+  @Patch(':id/add-members')
+  addParticipants(@CurrentUser() currentUser: IUserPayload,@Param('id' , ParseObjectIdPipe) id: string ,@Body() addParticipantsDto: AddParticipantsDto) {
+    return this.conversationService.addParticipants(id , currentUser , addParticipantsDto);
+  }
+  @Patch(':id/remove-members')
+  removeParticipants(@CurrentUser() currentUser: IUserPayload,@Param('id' , ParseObjectIdPipe) id: string ,@Body() removeParticipantsDto: AddParticipantsDto) {
+    return this.conversationService.removeParticipants(id , currentUser , removeParticipantsDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.conversationService.remove(+id);
+  remove(@Param('id' , ParseObjectIdPipe) id: string , @CurrentUser() currentUser: IUserPayload) {
+    return this.conversationService.remove(id , currentUser);
   }
 }

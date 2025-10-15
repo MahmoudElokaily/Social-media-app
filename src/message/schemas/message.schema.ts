@@ -14,14 +14,16 @@ export class Message {
   conversation: ConversationDocument;
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
   sender: UserDocument;
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
+  @Prop()
   text: string;
   @Prop()
-  mediaFiles?: MediaType
+  mediaFiles?: MediaType[];
   @Prop({ default: false })
   isDeleted: boolean;
   @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: 'User' })
   seenBy: UserDocument[];
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 

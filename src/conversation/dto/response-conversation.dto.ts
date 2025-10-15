@@ -11,7 +11,6 @@ export class ParticipantDto {
   email: string;
   @Expose()
   @Transform(({ obj }) => obj.avatar?.public_id ? obj.avatar?.url : null)
-  groupAvatar: string;
   avatarUrl: string;
 }
 

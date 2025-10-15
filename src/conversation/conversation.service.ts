@@ -11,9 +11,13 @@ import { UpdateConversationDto } from './dto/update-conversation.dto';
 import { CreatePrivateConversationDto } from './dto/create-private-conversation.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Conversation } from './schemas/conversation.schema';
+import {
+  Conversation,
+  ConversationDocument,
+} from './schemas/conversation.schema';
 import { UserService } from '../user/user.service';
 import { AddParticipantsDto } from './dto/add-participants.dto';
+import { Message } from '../message/schemas/message.schema';
 
 @Injectable()
 export class ConversationService {
@@ -150,5 +154,15 @@ export class ConversationService {
     if (conversation.isGroup && conversation.groupOwner?._id.toString() !== currentUser._id) throw new ForbiddenException();
     await conversation.deleteOne();
     // TODO Delete all message in this conversation
+  }
+
+  async updateLastMessage(id: string , messageId: string) {
+    const conversation = await this.conversationModel.findByIdAndUpdate(id , {
+      lastMessage: messageId,
+    },
+    {new: true}
+    );
+    if (!conversation) throw new NotFoundException('Conversation not found');
+    return conversation;
   }
 }

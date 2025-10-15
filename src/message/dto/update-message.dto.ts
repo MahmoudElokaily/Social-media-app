@@ -1,4 +1,9 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateMessageDto } from './create-message.dto';
+import { IsOptional } from 'class-validator';
+import { MediaType } from '../../_cores/dto/media-type.dto';
 
-export class UpdateMessageDto extends PartialType(CreateMessageDto) {}
+export class UpdateMessageDto {
+  @IsOptional()
+  text:string;
+  @IsOptional()
+  mediaFiles: MediaType[];
+}

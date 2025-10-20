@@ -39,7 +39,8 @@ export class ResponseMessageDto {
   text: string;
 
   @Expose()
-  mediaFiles: string[];
+  @Transform(({ obj }) => obj.mediaFiles?.map(file => file.url))
+  mediaFiles: string;
 
   @Expose()
   isDeleted: boolean;

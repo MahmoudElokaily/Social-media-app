@@ -6,6 +6,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Message, MessageSchema } from './schemas/message.schema';
 import { UserModule } from '../user/user.module';
 import { ConversationModule } from '../conversation/conversation.module';
+import { MessageGateway } from './message.gateway';
 
 @Module({
   imports: [
@@ -14,6 +15,6 @@ import { ConversationModule } from '../conversation/conversation.module';
     ConversationModule,
   ],
   controllers: [MessageController],
-  providers: [MessageService],
+  providers: [MessageService, MessageGateway],
 })
 export class MessageModule {}

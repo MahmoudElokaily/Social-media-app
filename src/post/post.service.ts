@@ -10,17 +10,29 @@ import { ReactionService } from '../reaction/reaction.service';
 import { ReactionType } from '../_cores/globals/enum';
 import { RemoveReactionDto } from './dto/remove-reaction.dto';
 import { UploadMediaDto } from '../_cores/dto/upload-media.dto';
+import { PostGateway } from './post.gateway';
+import { plainToInstance } from 'class-transformer';
+import { ResponsePostDto } from './dto/response-post.dto';
 
 @Injectable()
 export class PostService {
   constructor(
     @InjectModel(Post.name) private postModel: Model<Post>,
     private readonly reactionService: ReactionService,
+    private readonly postGateway: PostGateway,
   ) {
   }
-  create(createPostDto: CreatePostDto , currentUser: IUserPayload) {
+  async create(createPostDto: CreatePostDto , currentUser: IUserPayload) {
     const newPost =  new this.postModel({...createPostDto , author: currentUser});
-    return newPost.save();
+    const savedPost = await newPost.save();
+
+    const responsePost = plainToInstance(ResponsePostDto , savedPost , {
+      excludeExtraneousValues: true,
+    });
+
+    this.postGateway.handlePostCreate(responsePost);
+
+    return savedPost
   }
 
   async uploadMeda(id: string, uploadMediaDto: UploadMediaDto[]) {
@@ -29,14 +41,18 @@ export class PostService {
     uploadMediaDto.forEach((mediaDto) => {
         post.mediaFiles.push(mediaDto);
     })
-    return post.save();
+    await post.save();
+
+    this.postGateway.handleUploadMedia(id , uploadMediaDto);
   }
 
   async deleteMedia(id: string, deletePostDto: DeletePostDto) {
     const post = await this.postModel.findById(id);
     if (!post) throw new NotFoundException('Post not found');
     post.mediaFiles = post.mediaFiles.filter((mediaFile) => mediaFile.public_id !== deletePostDto.mediaId);
-    return post.save();
+    await post.save();
+
+    this.postGateway.handleRemoveMedia(id , deletePostDto.mediaId);
   }
 
   async findAll(currentUser: IUserPayload , limit: number, cursor: string) {
@@ -81,12 +97,17 @@ export class PostService {
     if (!post) {
       throw new NotFoundException('Post not found');
     }
+
+    this.postGateway.handlePostUpdate({ postId: id , backgroundColor: post.backgroundColor, content: post.content , privacy: post.privacy });
+
     return post;
   }
 
   async remove(id: string) {
     const post = await this.postModel.findByIdAndDelete(id);
     if (!post) throw new NotFoundException('Post not found');
+
+    this.postGateway.handleRemovePost(id);
     return post;
   }
 

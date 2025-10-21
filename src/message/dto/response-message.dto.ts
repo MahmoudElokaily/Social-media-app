@@ -1,18 +1,6 @@
 import { Expose, Transform, Type } from 'class-transformer';
 import { objectId } from '../../_cores/decorators/object-id.decorator';
-
-export class SeenByDto {
-  @Expose()
-  @objectId()
-  _id: string;
-
-  @Expose()
-  name: string;
-
-  @Expose()
-  @Transform(({ obj }) => obj.avatar?.public_id ? obj.avatar.url : null)
-  avatar: string | null;
-}
+import { UserPreviewDto } from '../../_cores/dto/user-preview.dto';
 
 export class ResponseMessageDto {
   @Expose()
@@ -46,8 +34,8 @@ export class ResponseMessageDto {
   isDeleted: boolean;
 
   @Expose()
-  @Type(() => SeenByDto)
-  seenBy: SeenByDto[];
+  @Type(() => UserPreviewDto)
+  seenBy: UserPreviewDto[];
 
   @Expose()
   createdAt: Date;

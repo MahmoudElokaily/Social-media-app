@@ -9,12 +9,16 @@ import { FriendRequest } from './schemas/friend-request.schema';
 import { Model } from 'mongoose';
 import { UserService } from '../user/user.service';
 import { FriendRequestType } from '../_cores/globals/enum';
+import { FriendGateway } from './friend.gateway';
+import { transformDto } from '../_cores/utills/transorm-dto.utils';
+import { ResponseFriendRequestDto } from './dto/response-friend-request.dto';
 
 @Injectable()
 export class FriendService {
   constructor(
     @InjectModel(FriendRequest.name) private friendModel: Model<FriendRequest>,
-    private userService: UserService
+    private userService: UserService,
+    private friendGateway: FriendGateway
   )
   {}
   async create(currentUser: IUserPayload , receiverId: string) {
@@ -37,12 +41,14 @@ export class FriendService {
       status: FriendRequestType.Pending
     });
 
-    return friendRequest.save();
-
+    const savedFriend = await friendRequest.save();
+    const populatedFriendRequest = await this.findOne(savedFriend._id.toString());
+    const responseFriendRequestDro = transformDto(ResponseFriendRequestDto , populatedFriendRequest);
+    this.friendGateway.handleSendFriendRequest(receiverId , responseFriendRequestDro);
   }
 
-  async acceptFriendRequest(currentUser: IUserPayload,FriendRequestId: string) {
-    const friendRequest = await this.friendModel.findById(FriendRequestId);
+  async acceptFriendRequest(currentUser: IUserPayload,friendRequestId: string) {
+    const friendRequest = await this.friendModel.findById(friendRequestId).populate('sender' , 'name avatar');
     if (!friendRequest) throw new NotFoundException('Friend request does not exist');
     if (friendRequest.status !== FriendRequestType.Pending) throw new BadRequestException('Friend request already handled');
     if (currentUser._id !== friendRequest.receiver._id.toString()) throw new ForbiddenException();
@@ -52,19 +58,37 @@ export class FriendService {
 
     await this.userService.addFriend(friendRequest.sender._id.toString() , friendRequest.receiver._id.toString());
     await this.userService.addFriend(friendRequest.receiver._id.toString() , friendRequest.sender._id.toString());
+
+    this.friendGateway.handleAcceptRequest({
+      friendRequestId ,
+      _id: friendRequest.sender._id.toString(),
+      name: friendRequest.sender.name,
+      avatarUrl: friendRequest.sender?.avatar?.url ? friendRequest.sender.avatar?.url : null,
+    })
   }
-  async rejectFriendRequest(currentUser: IUserPayload,FriendRequestId: string) {
-    const friendRequest = await this.friendModel.findById(FriendRequestId);
+  async rejectFriendRequest(currentUser: IUserPayload,friendRequestId: string) {
+    const friendRequest = await this.friendModel.findById(friendRequestId);
     if (!friendRequest) throw new NotFoundException('Friend request does not exist');
     if (friendRequest.status !== FriendRequestType.Pending) throw new BadRequestException('Friend request already handled');
     if (currentUser._id !== friendRequest.receiver._id.toString()) throw new ForbiddenException();
 
     friendRequest.status = FriendRequestType.Reject;
+
     await friendRequest.save();
+    this.friendGateway.handleRejectRequest(friendRequest.sender._id.toString() , friendRequestId);
 
   }
 
-   getCurrentRequestPending(currentUser: IUserPayload) {
+  async findOne(id: string) {
+    const friend = await this.friendModel.findById(id).populate([
+      { path: 'sender' , select: 'name email avatar' },
+      { path: 'receiver' , select: 'name email avatar'},
+    ]);
+    if (!friend) throw new NotFoundException('Friend request does not exist');
+    return friend;
+  }
+
+  getCurrentRequestPending(currentUser: IUserPayload) {
     return this.friendModel.find({
       receiver: currentUser._id,
       status: FriendRequestType.Pending
@@ -89,5 +113,6 @@ export class FriendService {
     });
     if (!friendRequest) throw new NotFoundException('Friend request does not exist');
     await friendRequest.deleteOne();
+    this.friendGateway.handleCancelRequest(receiverId , friendRequest.sender._id.toString() , friendRequest?._id.toString());
   }
 }

@@ -1,19 +1,14 @@
-import { Expose, Type } from 'class-transformer';
+import { Expose, Transform, Type } from 'class-transformer';
 import { objectId } from '../../_cores/decorators/object-id.decorator';
 import { UserPreviewDto } from '../../_cores/dto/user-preview.dto';
 
-export class PostResponsePostReaction {
+export class ResponseFriendRequestDto {
   @Expose()
   @objectId()
-  id: string;
-  @Expose()
-  @objectId()
-  post: string;
+  _id: string;
   @Expose()
   @Type(() => UserPreviewDto)
-  user: UserPreviewDto;
-  @Expose()
-  type: string;
+  sender: UserPreviewDto;
   @Expose()
   createdAt: Date;
   @Expose()

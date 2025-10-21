@@ -19,6 +19,8 @@ export class Comment {
   replyToUser: UserDocument | null;
   @Prop({required: true})
   content: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 

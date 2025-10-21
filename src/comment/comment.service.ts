@@ -6,6 +6,9 @@ import { Model, Types } from 'mongoose';
 import { PostService } from '../post/post.service';
 import { Comment } from './schemas/comment.schema';
 import { UserService } from '../user/user.service';
+import { CommentGateway } from './comment.gateway';
+import { transformDto } from '../_cores/utills/transorm-dto.utils';
+import { ResponseCommentDto } from './dto/response-comment.dto';
 
 @Injectable()
 export class CommentService {
@@ -13,6 +16,7 @@ export class CommentService {
     @InjectModel(Comment.name) private commentModel: Model<Comment>,
     private readonly postService: PostService,
     private readonly userService: UserService,
+    private readonly commentGateway: CommentGateway,
   ) {
   }
 
@@ -40,7 +44,11 @@ export class CommentService {
       userComment: currentUser._id,
       replyToUser: realReplyToUserId
     });
-    return comment.save();
+    const savedComment = await comment.save();
+    const populatedComment = await this.findOne(savedComment._id.toString());
+    const responseCommentDto = transformDto(ResponseCommentDto , populatedComment);
+    this.commentGateway.handleCommentCreate(postId , responseCommentDto);
+    return savedComment;
   }
 
   async getComments(postId: string) {
@@ -67,17 +75,21 @@ export class CommentService {
     return finalResult;
   }
 
-  findAll() {
-    return `This action returns all comment`;
-  }
 
-  findOne(id: number) {
-    return `This action returns a #${id} comment`;
+  async findOne(id: string) {
+    const comment = await this.commentModel.findById(id) .populate([
+      { path: 'userComment' },
+      { path: 'replyToUser' }
+    ]);
+    if (!comment) throw new NotFoundException('Comment not found');
+
+    return comment;
   }
 
   async update(id: string, updateCommentDto: UpdateCommentDto) {
     const comment = await this.commentModel.findByIdAndUpdate(id, {content : updateCommentDto.content} , { new: true });
     if (!comment) throw new NotFoundException('Comment not found');
+    this.commentGateway.handleCommentUpdate(id , comment.content , comment.updatedAt);
     return comment;
   }
 
@@ -87,6 +99,6 @@ export class CommentService {
     if (!comment.parent){
       await this.commentModel.deleteMany({parent:comment._id});
     }
-    return "comment Deleted successfully";
+    this.commentGateway.handleCommentRemove(id , comment.parent ? comment.parent._id.toString() : null);
   }
 }

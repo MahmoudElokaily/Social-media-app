@@ -26,30 +26,34 @@ import { AddReactionDto } from './dto/add-reaction.dto';
 import { RemoveReactionDto } from './dto/remove-reaction.dto';
 import { ParseObjectIdPipe } from '@nestjs/mongoose';
 import { UploadMediaDto } from '../_cores/dto/upload-media.dto';
+import { PostResponsePostReaction } from '../message/dto/response-post-reaction.dto';
 
 @Controller('posts')
-@TransformDto(ResponsePostDto)
 @UseGuards(AuthGuard , RoleGuard)
 export class PostController {
   constructor(private readonly postService: PostService) {}
 
   @Delete('reaction')
+  @TransformDto(ResponsePostDto)
   removeReaction(@Body() removeReactionDto: RemoveReactionDto, @CurrentUser() currentUser: IUserPayload) {
     return this.postService.removeReaction(removeReactionDto , currentUser);
   }
 
   @Post()
+  @TransformDto(ResponsePostDto)
   create(@Body() createPostDto: CreatePostDto, @CurrentUser() currentUser: IUserPayload) {
     return this.postService.create(createPostDto , currentUser);
   }
 
   @Post('reaction')
+  @TransformDto(ResponsePostDto)
   addReaction(@Body() addReactionDto: AddReactionDto, @CurrentUser() currentUser: IUserPayload) {
     return this.postService.addReaction(addReactionDto , currentUser);
   }
 
 
   @Patch(':id/upload')
+  @TransformDto(ResponsePostDto)
   uploadMedia(
     @Param('id' , ParseObjectId) id: string,
     @Body() uploadMediaDto: UploadMediaDto[]) {
@@ -57,6 +61,7 @@ export class PostController {
   }
 
   @Delete(':id/delete')
+  @TransformDto(ResponsePostDto)
   deleteMedia(
     @Param('id' , ParseObjectId) id: string,
     @Body() deletePostDto: DeletePostDto) {
@@ -64,22 +69,31 @@ export class PostController {
   }
 
   @Get()
+  @TransformDto(ResponsePostDto)
   findAll(@CurrentUser() currentUser: IUserPayload,@Query('limit' ,new DefaultValuePipe(10) ,ParseIntPipe) limit: number, @Query('cursor') cursor: string) {
     return this.postService.findAll(currentUser , limit , cursor);
   }
 
   @Get(':id')
+  @TransformDto(ResponsePostDto)
   findOne(@Param('id' , ParseObjectIdPipe) id: string,@CurrentUser() currentUser: IUserPayload) {
     return this.postService.findOneWithMyReaction(id , currentUser);
   }
+  @Get(':id/reactions')
+  @TransformDto(PostResponsePostReaction)
+  findOneWithReactions(@Param('id' , ParseObjectIdPipe) id: string) {
+    return this.postService.findPostReactions(id);
+  }
 
   @Patch(':id')
+  @TransformDto(ResponsePostDto)
   @Roles([UserRole.ADMIN , UserRole.USER])
   update(@Param('id') id: string, @Body() updatePostDto: UpdatePostDto) {
     return this.postService.update(id, updatePostDto);
   }
 
   @Delete(':id')
+  @TransformDto(ResponsePostDto)
   remove(@Param('id' , ParseObjectId) id: string) {
     return this.postService.remove(id);
   }

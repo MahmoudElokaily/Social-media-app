@@ -119,7 +119,6 @@ export class PostService {
     let oldReactionsType: ReactionType | null = null;
 
     if (existingReaction) {
-      // لو نفس التفاعل مفيش داعي نعمل حاجة
       if (type === existingReaction.type) {
         return post;
       }
@@ -130,22 +129,27 @@ export class PostService {
       await this.reactionService.create(addReactionDto, currentUser);
     }
 
-    // نتأكد إن reactionCounts موجودة
     if (!post.reactionCounts) {
       post.reactionCounts = new Map<ReactionType, number>();
     }
 
-    // لو فيه تفاعل قديم: نقص واحد
     if (oldReactionsType !== null) {
       const oldValue = post.reactionCounts.get(oldReactionsType) || 0;
       post.reactionCounts.set(oldReactionsType, Math.max(oldValue - 1, 0));
     }
 
-    // نزود واحد على التفاعل الجديد
     const newValue = post.reactionCounts.get(type) || 0;
     post.reactionCounts.set(type, newValue + 1);
 
-    return post.save();
+    const savedPost = await post.save();
+
+    const responsePost = plainToInstance(ResponsePostDto , savedPost , {
+      excludeExtraneousValues: true,
+    });
+
+    this.postGateway.handleAddReaction(responsePost);
+
+    return savedPost;
   }
 
 
@@ -155,7 +159,19 @@ export class PostService {
     const existingReaction = await this.reactionService.findExisting(postId, currentUser._id);
     if (!existingReaction) return;
     await this.reactionService.remove(existingReaction._id.toString());
-    return this.postModel.findByIdAndUpdate(post._id , { $inc: { [`reactionCounts.${existingReaction.type}`]: -1 }, } , { new: true });
+    const savedPost = await this.postModel.findByIdAndUpdate(post._id , { $inc: { [`reactionCounts.${existingReaction.type}`]: -1 }, } , { new: true });
+
+    const responsePost = plainToInstance(ResponsePostDto , savedPost , {
+      excludeExtraneousValues: true,
+    });
+
+    this.postGateway.handleRemoveReaction(responsePost);
+
+    return savedPost;
+  }
+
+   findPostReactions(postId: string) {
+    return this.reactionService.findPostReaction(postId);
   }
 
 }

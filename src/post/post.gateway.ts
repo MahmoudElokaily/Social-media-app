@@ -39,4 +39,12 @@ export class PostGateway {
   handleRemovePost(postId: string) {
     this.server.emit('post_deleted' , postId);
   }
+
+  handleAddReaction(post: ResponsePostDto) {
+    this.server.emit('post_add_reaction' , post);
+  }
+
+  handleRemoveReaction(post: ResponsePostDto) {
+    this.server.emit('post_remove_reaction' , post);
+  }
 }

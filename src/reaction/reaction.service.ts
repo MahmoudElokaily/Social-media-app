@@ -43,4 +43,9 @@ export class ReactionService {
     if (!reaction) throw new NotFoundException('Reaction does not exist');
     return reaction;
   }
+
+  async findPostReaction(postId: string) {
+    return this.reactionModel.find({ post: postId })
+      .populate('user' , 'name avatar');
+  }
 }

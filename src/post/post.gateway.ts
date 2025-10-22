@@ -4,7 +4,6 @@ import {
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import { ResponsePostDto } from './dto/response-post.dto';
-import { MediaType } from 'express';
 import { UploadMediaDto } from '../_cores/dto/upload-media.dto';
 import { PostPrivacy } from './enums/post-privacy.enum';
 

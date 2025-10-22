@@ -12,3 +12,9 @@ export enum FriendRequestType {
   Reject = "rejected",
   Pending = "pending",
 }
+
+export enum NotificationType {
+  FriendRequest = "friendRequest",
+  Reaction = "reaction",
+  Comment = "comment",
+}

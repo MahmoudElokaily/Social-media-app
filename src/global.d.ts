@@ -16,10 +16,3 @@ declare global {
   }
 }
 
-// export class MediaType {
-//   public_id: string;
-//   version: string;
-//   display_name: string;
-//   format: string;
-//   resource_type: string;
-// }

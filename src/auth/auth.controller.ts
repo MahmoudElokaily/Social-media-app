@@ -3,19 +3,17 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
-  UseInterceptors,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignUpDto } from './dto/signup.dto';
 import { TransformDto } from '../_cores/interceptors/transform-dto.interceptor';
-import { ResponseAuthDto } from './dto/response-auth.dto';
 import { SignIpDto } from './dto/signip.dto';
+import { ResponseUserDto } from '../user/dto/response-user.dto';
 
 @Controller('auth')
-@TransformDto(ResponseAuthDto)
+@TransformDto(ResponseUserDto)
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 

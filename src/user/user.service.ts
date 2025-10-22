@@ -12,7 +12,7 @@ export class UserService {
   ) {
   }
 
-  async findAll(q: string , limit: number , cursor: string) {
+  async findAll(currentUser: IUserPayload , q: string , limit: number , cursor: string) {
     const query: Record<string, any> = { isActive: true };
     if (q) {
       query.$or = [
@@ -23,6 +23,10 @@ export class UserService {
     if (cursor) {
       query.email = { $gt: cursor };
     }
+    const user =  await this.findOne(currentUser._id);
+    const friendIds = new Set(
+      (user.friends || []).map((friend) => friend._id.toString()),
+    );
 
     const users = await this.userModel.find(query)
       .sort({ email : 1 })
@@ -30,7 +34,10 @@ export class UserService {
       .lean()
 
     const hasNextPage = users.length > limit;
-    const items = hasNextPage ? users.slice(0 , limit) : users;
+    const items = (hasNextPage ? users.slice(0 , limit) : users).map((user) => ({
+      ...user,
+      isFriend: friendIds.has(user._id.toString()),
+    }));
     return {
       items: items,
       hasNextPage,
@@ -38,8 +45,8 @@ export class UserService {
     };
   }
 
-  async getCurrentUser(currentUser: IUserPayload) {
-    const user = await this.userModel.findOne({ _id: currentUser._id , isActive: true });
+  async getCurrentUser(userId: string) {
+    const user = await this.userModel.findOne({ _id: userId , isActive: true });
     if (!user) throw new NotFoundException("User not found");
     return user;
   }

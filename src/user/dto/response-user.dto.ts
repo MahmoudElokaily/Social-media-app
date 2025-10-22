@@ -27,4 +27,6 @@ export class ResponseUserDto {
   isActive: boolean;
   @Expose()
   friends: ResponseUserDto[];
+  @Expose()
+  isFriend: boolean;
 }

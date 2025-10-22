@@ -33,7 +33,7 @@ export class UserController {
   @Get('profile')
   @UseInterceptors(ResponseUserDto)
   getCurrentUser(@CurrentUser() currentUser: IUserPayload) {
-    return this.userService.getCurrentUser(currentUser);
+    return this.userService.getCurrentUser(currentUser._id.toString());
   }
 
   @Post('upload-avatar')
@@ -50,11 +50,12 @@ export class UserController {
   @Get()
   @Roles([UserRole.ADMIN])
   findAll(
+    @CurrentUser() currentUser: IUserPayload,
     @Query('q') q: string ,
     @Query('limit' , new DefaultValuePipe(10) , ParseIntPipe) limit: number ,
     @Query('cursor') cursor: string
     ) {
-    return this.userService.findAll(q , limit, cursor);
+    return this.userService.findAll(currentUser , q , limit, cursor);
   }
 
   @Get(':id')

@@ -12,6 +12,7 @@ import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { SignIpDto } from './dto/signip.dto';
+import { UserService } from '../user/user.service';
 
 const SALT = 10;
 
@@ -19,7 +20,8 @@ const SALT = 10;
 export class AuthService {
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
-    private jwtService: JwtService
+    private jwtService: JwtService,
+    private userService: UserService,
   ) {}
   async signUp(signUpDto: SignUpDto) {
     const {email , name , password , role } = signUpDto;
@@ -34,13 +36,16 @@ export class AuthService {
     // Generate JWT
     const payload = {
       _id: saveUser._id,
-      name,
-      email,
+      name: saveUser.name,
+      email: saveUser.email,
       role: saveUser.role,
       isActive: saveUser.isActive,
     };
     const accessToken = await this.jwtService.signAsync(payload);
-    return { user: saveUser , accessToken };
+    const responseUser= await this.userService.getCurrentUser(
+      user._id.toString()
+    )
+    return { user: responseUser , accessToken };
   }
 
   async signIn(signIpDto: SignIpDto) {

@@ -4,7 +4,7 @@ export enum ReactionType {
   Love = "love",
   Angry = "angry",
   Haha = "haha",
-  Happy = "happy",
+  Sad = "sad",
 }
 
 export enum FriendRequestType {

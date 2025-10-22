@@ -8,6 +8,7 @@ export class ResponseCommentDto {
   _id: string;
   @Expose()
   @objectId()
+  @Transform(({obj}) => obj.post)
   post: string;
   @Expose()
   @objectId()

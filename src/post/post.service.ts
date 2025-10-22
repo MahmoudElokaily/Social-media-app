@@ -16,6 +16,11 @@ import { ResponsePostDto } from './dto/response-post.dto';
 import { NotificationService } from '../notification/notification.service';
 import { PostPrivacy } from './enums/post-privacy.enum';
 import { UserService } from '../user/user.service';
+import {
+  transformDto,
+  transformDtoArray,
+} from '../_cores/utills/transorm-dto.utils';
+import { ResponsePostReaction } from '../message/dto/response-post-reaction.dto';
 
 @Injectable()
 export class PostService {
@@ -40,6 +45,18 @@ export class PostService {
     this.postGateway.handlePostCreate(responsePost);
 
     return savedPost;
+  }
+
+  async replaceMedia(id: string , uploadMediaDto: UploadMediaDto[]) {
+    const post = await this.findOne(id);
+    post.mediaFiles = [];
+    await post.save();
+    uploadMediaDto.forEach((mediaDto) => {
+      post.mediaFiles.push(mediaDto);
+    })
+    const savedPost = await post.save();
+    const responsePost = transformDto(ResponsePostDto , savedPost);
+    this.postGateway.handleReplaceMedia(id , responsePost.mediaFiles);
   }
 
   async uploadMeda(id: string, uploadMediaDto: UploadMediaDto[]) {
@@ -106,6 +123,10 @@ export class PostService {
     return post;
   }
 
+  findOneWithReactions(id: string) {
+    return this.reactionService.findPostReaction(id);
+  }
+
   async findOneWithMyReaction(id: string, currentUser: IUserPayload) {
     const post = await this.postModel.findById(id).populate('author').lean();
     if (!post) throw new NotFoundException('Post not found');
@@ -115,6 +136,7 @@ export class PostService {
     );
     return { ...post, myReaction: myReaction?.type };
   }
+
 
   async update(id: string, updatePostDto: UpdatePostDto) {
     const post = await this.postModel.findByIdAndUpdate(id, updatePostDto, {
@@ -176,12 +198,19 @@ export class PostService {
     post.reactionCounts.set(type, newValue + 1);
 
     const savedPost = await post.save();
+    const updatePost = await this.findOne(postId);
+    const reactions = await this.findOneWithReactions(updatePost._id.toString());
 
-    const responsePost = plainToInstance(ResponsePostDto, savedPost, {
-      excludeExtraneousValues: true,
-    });
+    const responsePost = transformDto(ResponsePostDto, updatePost);
 
-    this.postGateway.handleAddReaction(responsePost);
+    const responseReactions = transformDtoArray(ResponsePostReaction, reactions);
+
+    this.postGateway.handleAddReaction({
+        ...responsePost,
+        myReaction: addReactionDto.type
+      },
+      responseReactions,
+    );
     const notificationContent = `${currentUser.name} has react ${type} to your post`;
     await this.notificationService.create(
       currentUser._id,

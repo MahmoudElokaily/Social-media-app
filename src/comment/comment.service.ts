@@ -47,7 +47,7 @@ export class CommentService {
     const savedComment = await comment.save();
     const populatedComment = await this.findOne(savedComment._id.toString());
     const responseCommentDto = transformDto(ResponseCommentDto , populatedComment);
-    this.commentGateway.handleCommentCreate(postId , responseCommentDto);
+    this.commentGateway.handleCommentCreate(responseCommentDto);
     return savedComment;
   }
 

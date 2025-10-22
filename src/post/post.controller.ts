@@ -26,7 +26,7 @@ import { AddReactionDto } from './dto/add-reaction.dto';
 import { RemoveReactionDto } from './dto/remove-reaction.dto';
 import { ParseObjectIdPipe } from '@nestjs/mongoose';
 import { UploadMediaDto } from '../_cores/dto/upload-media.dto';
-import { PostResponsePostReaction } from '../message/dto/response-post-reaction.dto';
+import { ResponsePostReaction } from '../message/dto/response-post-reaction.dto';
 
 @Controller('posts')
 @UseGuards(AuthGuard , RoleGuard)
@@ -80,7 +80,7 @@ export class PostController {
     return this.postService.findOneWithMyReaction(id , currentUser);
   }
   @Get(':id/reactions')
-  @TransformDto(PostResponsePostReaction)
+  @TransformDto(ResponsePostReaction)
   findOneWithReactions(@Param('id' , ParseObjectIdPipe) id: string) {
     return this.postService.findPostReactions(id);
   }
@@ -90,6 +90,12 @@ export class PostController {
   @Roles([UserRole.ADMIN , UserRole.USER])
   update(@Param('id') id: string, @Body() updatePostDto: UpdatePostDto) {
     return this.postService.update(id, updatePostDto);
+  }
+  @Patch('replace-media')
+  @TransformDto(ResponsePostDto)
+  @Roles([UserRole.ADMIN , UserRole.USER])
+  replaceMedia(@Param('id') id: string, @Body() uploadMediaDtos: UploadMediaDto[]) {
+    return this.postService.replaceMedia(id, uploadMediaDtos);
   }
 
   @Delete(':id')

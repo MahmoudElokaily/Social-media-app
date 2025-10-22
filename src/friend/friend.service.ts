@@ -26,11 +26,21 @@ export class FriendService {
     const receiver = await this.userService.findOne(receiverId);
     // prevent send request to yourself
     if (currentUser._id === receiver._id.toString()) throw new BadRequestException('Cannot send a friend request to yourself');
+
     // prevent duplicate the same friend request
     const existingFriendRequest = await this.friendModel.findOne({
-      sender: currentUser._id ,
-      receiver: receiver._id ,
-      status: { $in: [FriendRequestType.Pending , FriendRequestType.Accept]}
+      $or: [
+        {
+          sender: currentUser._id,
+          receiver: receiver._id,
+          status: {$in: [FriendRequestType.Pending , FriendRequestType.Accept]}
+        },
+        {
+          sender: receiver._id,
+          receiver: currentUser._id,
+          status: {$in: [FriendRequestType.Pending , FriendRequestType.Accept]}
+        },
+      ]
     });
 
     if (existingFriendRequest) throw new BadRequestException('The friend request already sent');

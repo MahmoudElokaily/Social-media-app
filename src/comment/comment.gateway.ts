@@ -13,8 +13,8 @@ import { ResponseCommentDto } from './dto/response-comment.dto';
   @WebSocketServer()
   server: Server;
 
-  handleCommentCreate(postId: string , responseCommentDto: ResponseCommentDto) {
-    this.server.emit('comment_created', {postId , comment: responseCommentDto });
+  handleCommentCreate(responseCommentDto: ResponseCommentDto) {
+    this.server.emit('comment_created', responseCommentDto);
   }
 
   handleCommentUpdate(commentId: string, content: string , updatedAt: Date) {

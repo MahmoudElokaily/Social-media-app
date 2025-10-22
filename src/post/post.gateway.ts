@@ -6,6 +6,7 @@ import { Server } from 'socket.io';
 import { ResponsePostDto } from './dto/response-post.dto';
 import { UploadMediaDto } from '../_cores/dto/upload-media.dto';
 import { PostPrivacy } from './enums/post-privacy.enum';
+import { ResponsePostReaction } from '../message/dto/response-post-reaction.dto';
 
 @WebSocketGateway({
   cors: {
@@ -39,11 +40,18 @@ export class PostGateway {
     this.server.emit('post_deleted' , postId);
   }
 
-  handleAddReaction(post: ResponsePostDto) {
-    this.server.emit('post_add_reaction' , post);
+  handleAddReaction(post: ResponsePostDto , reactions: ResponsePostReaction[]) {
+    this.server.emit('post_add_reaction' , post , reactions);
   }
 
   handleRemoveReaction(post: ResponsePostDto) {
     this.server.emit('post_remove_reaction' , post);
+  }
+
+  handleReplaceMedia(postId: string, uploadMediaDtos: UploadMediaDto[]) {
+    this.server.emit('post_replace_media' , {
+      postId,
+      mediaFiles: uploadMediaDtos
+    })
   }
 }

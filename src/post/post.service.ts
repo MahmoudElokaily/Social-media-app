@@ -14,6 +14,8 @@ import { PostGateway } from './post.gateway';
 import { plainToInstance } from 'class-transformer';
 import { ResponsePostDto } from './dto/response-post.dto';
 import { NotificationService } from '../notification/notification.service';
+import { PostPrivacy } from './enums/post-privacy.enum';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class PostService {
@@ -21,6 +23,7 @@ export class PostService {
     @InjectModel(Post.name) private postModel: Model<Post>,
     private readonly reactionService: ReactionService,
     private readonly postGateway: PostGateway,
+    private readonly userService: UserService,
     private readonly notificationService: NotificationService,
   ) {}
   async create(createPostDto: CreatePostDto, currentUser: IUserPayload) {
@@ -62,7 +65,15 @@ export class PostService {
   }
 
   async findAll(currentUser: IUserPayload, limit: number, cursor: string) {
-    const query: Record<string, object> = {};
+    const user = await this.userService.findOne(currentUser._id);
+    const friendsOfUserIds = user.friends.map(fr => fr._id.toString());
+    const query: Record<string, object> = {
+      $or: [
+        { privacy: PostPrivacy.PUBLIC },
+        { privacy: PostPrivacy.FRIENDS, author: { $in: friendsOfUserIds } },
+        { privacy: PostPrivacy.PRIVATE , author: currentUser._id },
+      ],
+    };
     if (cursor) {
       query.createdAt = { $lt: new Date(cursor) };
     }

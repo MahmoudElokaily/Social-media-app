@@ -12,6 +12,7 @@ import { PostGateway } from './post.gateway';
   imports: [
     MongooseModule.forFeature([{ name: Post.name, schema: PostSchema }]),
     ReactionModule,
+    UserModule,
   ],
   controllers: [PostController],
   providers: [PostService, PostGateway],

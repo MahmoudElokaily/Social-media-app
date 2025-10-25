@@ -161,12 +161,10 @@ Push notifications integration
 ---
 
 ## 👨‍💻 Author
+- **Name:** Mahmoud El-Okaily
+- **Role:** Software Engineer | Backend Developer (NestJS / Node.js)
+- **Phone:** +20 10 1553 1345
+- **LinkedIn:** [linkedin.com/in/mahmoud-elokaily1](https://www.linkedin.com/in/mahmoud-elokaily1)
+- **GitHub:** [github.com/MahmoudElokaily](https://github.com/MahmoudElokaily)
 
-| Field     | Details |
-|-----------|---------|
-| Name      | Mahmoud El-Okaily |
-| Role      | Software Engineer | Backend Developer (NestJS / Node.js) |
-| Phone     | +20 10 1553 1345 |
-| LinkedIn  | [linkedin.com/in/mahmoud-elokaily1](https://www.linkedin.com/in/mahmoud-elokaily1) |
-| GitHub    | [github.com/MahmoudElokaily](https://github.com/MahmoudElokaily) |
 

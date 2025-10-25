@@ -157,7 +157,7 @@ Online/offline presence indicators
 Pagination and search filters
 
 Push notifications integration
-
+---
 👨‍💻 Author
 Mahmoud El-Okaily
 Software Engineer | Backend Developer (NestJS / Node.js)

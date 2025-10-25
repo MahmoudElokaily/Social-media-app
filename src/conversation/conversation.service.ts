@@ -17,7 +17,7 @@ import {
 } from './schemas/conversation.schema';
 import { UserService } from '../user/user.service';
 import { AddParticipantsDto } from './dto/add-participants.dto';
-import { Message } from '../message/schemas/message.schema';
+import { Message, MessageDocument } from '../message/schemas/message.schema';
 
 @Injectable()
 export class ConversationService {
@@ -75,21 +75,39 @@ export class ConversationService {
     };
 
     if (cursor) {
-      query.updatedAt = { $lt: new Date(cursor) };
+      query.lastMessageAt = { $lt: new Date(cursor) };
     }
 
     const conversations = await this.conversationModel.find(query)
-      .sort({updatedAt: -1})
       .limit(limit + 1)
-      .populate('groupOwner' , 'name email')
-      .populate('participants')
+      .populate([
+        {path: 'groupOwner' , select:'name email'},
+        {
+          path: 'lastMessage', select: "sender",
+          populate: {
+            path: 'sender',
+            select: 'name'
+          }
+        },
+        {path: 'participants'}
+      ])
+      .sort({ lastMessageAt: -1 })
       .lean();
 
     const hasNextPage = conversations.length > limit;
     const items = hasNextPage ? conversations.slice(0 , limit) : conversations;
 
+    const resultItems = items.map((conversation) => {
+      const seenBy = conversation.lastMessage?.seenBy || [];
+      const isLastMessageSeen = seenBy.some((userId: any) => userId.toString() === currentUser._id.toString());
+      return {
+        ...conversation,
+        isLastMessageSeen,
+      }
+    });
+
     return {
-      items,
+      items: resultItems,
       hasNextPage,
       cursor: hasNextPage ? items[items.length - 1].updatedAt : null,
     }
@@ -164,5 +182,11 @@ export class ConversationService {
     );
     if (!conversation) throw new NotFoundException('Conversation not found');
     return conversation;
+  }
+  async updateLastMessageAt(id: string , message: MessageDocument) {
+    await this.conversationModel.findByIdAndUpdate(id , {
+      lastMessage: message._id,
+      lastMessageAt: message.createdAt
+    })
   }
 }

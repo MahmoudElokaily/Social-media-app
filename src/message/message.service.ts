@@ -41,6 +41,7 @@ export class MessageService {
     });
     const savedMessage = await message.save();
     await this.conversationService.updateLastMessage(conversationId, savedMessage._id.toString());
+    await this.conversationService.updateLastMessageAt(conversationId, savedMessage);
 
     const newMessage = await this.messageModel.findById(savedMessage._id).populate([
       { path: 'sender' , select: 'name avatar' },

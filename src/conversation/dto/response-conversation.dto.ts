@@ -1,6 +1,6 @@
 import { Expose, Transform, Type } from 'class-transformer';
 import { objectId } from '../../_cores/decorators/object-id.decorator';
-import type { UserDocument } from '../../user/schemas/user.schema';
+import type { MessageDocument } from '../../message/schemas/message.schema';
 
 export class ParticipantDto {
   @Expose()
@@ -39,6 +39,12 @@ export class ResponseConversationDto {
   @Expose()
   @Transform(({ obj }) => obj.groupAvatar?.public_id ? obj.groupAvatar?.url : null)
   groupAvatar: string;
+  @Expose()
+  lastMessage: MessageDocument;
+  @Expose()
+  lastMessageAt: Date;
+  @Expose()
+  isLastMessageSeen: Date;
   @Expose()
   createdAt: Date;
   @Expose()

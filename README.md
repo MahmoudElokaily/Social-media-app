@@ -158,7 +158,7 @@ Pagination and search filters
 
 Push notifications integration
 ```
-👨‍💻 Author
+## 👨‍💻 Author
 Mahmoud El-Okaily
 Software Engineer | Backend Developer (NestJS / Node.js)
 📞 Phone: +20 10 1553 1345  

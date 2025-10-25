@@ -1,98 +1,166 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# 📱 Social Media Backend API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A full-featured **Social Media Backend Application** built with **NestJS** and **MongoDB**, providing a real-time social experience — including authentication, friends, posts, comments, private chats, notifications, and media uploads through Cloudinary.  
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+---
 
-## Description
+## 🚀 Overview
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+This project is a backend for a social media platform that allows users to connect, share content, and communicate in real-time.  
+It’s designed using a **modular architecture** with **NestJS**, ensuring scalability, maintainability, and clean separation of concerns.  
 
-## Project setup
+---
 
+## ⚙️ Tech Stack
+
+| Layer | Technology |
+|-------|-------------|
+| Framework | **NestJS** |
+| Database | **MongoDB + Mongoose** |
+| Authentication | **JWT (JSON Web Token)** |
+| Real-time Communication | **WebSocket (NestJS Gateway)** |
+| File Storage | **Cloudinary** |
+| Validation | **class-validator / class-transformer** |
+| Env Config | **dotenv** |
+
+---
+
+## 🧩 Modules Description
+
+### 🔐 Auth Module
+Handles the **authentication and authorization** logic.  
+- User registration & login  
+- Password encryption using bcrypt  
+- JWT-based authentication  
+- Guards & decorators for protecting routes  
+
+---
+
+### 👤 User Module
+Manages **user data and profiles**.  
+- Retrieve all users or a specific user  
+- Update profile info and avatars (via Cloudinary)  
+- Manage user privacy and account details  
+
+---
+
+### 📝 Post Module
+Responsible for **creating, updating, and managing user posts**.  
+- CRUD operations for posts  
+- Upload images or videos using Cloudinary  
+- React to posts (like, love, haha, etc.)  
+- Real-time updates for reactions and new posts  
+
+---
+
+### 💬 Comment Module
+Enables **user interaction through comments**.  
+- Add, edit, or delete comments  
+- Reply to other comments  
+- Nested comment structure  
+- Real-time updates when new comments are added  
+
+---
+
+### 🤝 Friend Module
+Implements **social connection features**.  
+- Send, accept, and reject friend requests  
+- Cancel sent requests or unfriend users  
+- Retrieve friends and pending requests  
+- Real-time notifications on friend request actions  
+
+---
+
+### 💭 Conversation Module
+Handles **real-time private messaging** between users.  
+- Create conversations  
+- Send, edit, or delete messages  
+- Mark messages as seen  
+- Real-time delivery and seen status via WebSocket  
+
+---
+
+### ☁️ Cloudinary Module
+Integrates **Cloudinary** for file and image storage.  
+- Upload profile pictures, post media, and message attachments  
+- Retrieve public URLs and metadata  
+- Centralized media handling across modules  
+
+---
+
+### 🔔 Notification Module
+Manages **real-time notifications** across the app.  
+- Trigger notifications for messages, comments, and friend requests  
+- Deliver instantly using WebSockets  
+- Fetch notification history for users  
+
+---
+
+## ⚙️ Run the Project
+
+To run this project locally, follow these steps 👇  
+
+### 1️⃣ Clone the repository
 ```bash
-$ pnpm install
-```
+git clone https://github.com/MahmoudElokaily/Social-media-app
+cd social-media-app
+2️⃣ Install dependencies
+pnpm install
+3️⃣ Create .env file
+Before running the project, create a .env file in the root directory.
+This file contains the environment variables required for the app to function.
 
-## Compile and run the project
+Copy and paste the following into your .env file:
 
-```bash
-# development
-$ pnpm run start
+# MongoDB Configuration
+MONGO_HOST=
+MONGO_DB=
+MONGO_USER=
+MONGO_PASS=
 
-# watch mode
-$ pnpm run start:dev
+# Server Port
+PORT=
 
-# production mode
-$ pnpm run start:prod
-```
+# Cloudinary Configuration
+CLOUDINARY_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
 
-## Run tests
+# JWT Configuration
+JWT_SECRET=
+JWT_EXPIRATION=
+⚠️ Make sure to fill in these values with your own credentials before starting the server.
 
-```bash
-# unit tests
-$ pnpm run test
+4️⃣ Start the application
+pnpm run start:dev
+Your app should now be running at:
+👉 http://localhost:5000
 
-# e2e tests
-$ pnpm run test:e2e
+🧪 Test the API
+Import the included Postman Collection to test all endpoints:
+social media.postman_collection.json
 
-# test coverage
-$ pnpm run test:cov
-```
+⚡ Real-Time Features
+Instant message delivery
 
-## Deployment
+Live typing indicators
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+Seen/unseen message status
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+Real-time notifications for reactions, messages, and requests
 
-```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
-```
+🚀 Future Enhancements
+Group chats
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+Online/offline presence indicators
 
-## Resources
+Pagination and search filters
 
-Check out a few resources that may come in handy when working with NestJS:
+Push notifications integration
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+👨‍💻 Author
+Mahmoud El-Okaily
+Software Engineer | Backend Developer (NestJS / Node.js)
+📞 Phone: +20 10 1553 1345  
+🔗 LinkedIn: www.linkedin.com/in/mahmoud-elokaily1
+💻 GitHub: https://github.com/MahmoudElokaily

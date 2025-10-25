@@ -14,6 +14,7 @@ import { MessageGateway } from './message.gateway';
 import { plainToInstance } from 'class-transformer';
 import { ResponseMessageDto } from './dto/response-message.dto';
 import { ResponseUserDto } from '../user/dto/response-user.dto';
+import { transformDto } from '../_cores/utills/transorm-dto.utils';
 
 
 @Injectable()
@@ -61,16 +62,17 @@ export class MessageService {
     const isParticipant = conversation.participants.some(
       (p) => p._id.toString() === currentUser._id.toString()
     );
+    if (!isParticipant) throw new ForbiddenException('You are not a participant in this conversation');
     const query: Record<string, any> =  {
       conversation: conversationId,
       isDeleted: false
     };
     if (cursor) {
-      query.createdAt = { $gt: new Date(cursor)}
+      query.createdAt = { $lt: new Date(cursor)}
     }
     const messages = await this.messageModel
       .find(query)
-      .sort({ createdAt: 1 })
+      .sort({ createdAt: -1 })
       .limit(limit + 1)
       .populate([
         { path: 'sender' , select: 'name avatar' },
@@ -125,29 +127,63 @@ export class MessageService {
   }
 
   async markSeenMessage(id: string , currentUser: IUserPayload) {
-    const message = await this.findOne(id);
-    const user = await this.userService.findOne(currentUser._id);
-
-    const alreadySeen = message.seenBy.some(u => u?.toString() === currentUser._id);
-
-    if (!alreadySeen) {
-      message.seenBy.push(user);
-      await message.save();
-
-      const responseUserDto = plainToInstance(ResponseUserDto , user , {
-        excludeExtraneousValues: true,
-      });
-
-      this.messageGateway.handleSeenMessage(
-        message.conversation._id.toString(),
-        message._id.toString(),
-        {
-          seenById: user._id.toString(),
-          seenByName: user.name,
-          seenByAvatarUrl: user.avatar?.url
+    const userId = currentUser._id;
+    const message = await this.messageModel.findOneAndUpdate({_id: id},
+      {
+        $addToSet: {
+          seenBy: userId
         }
-      );
-    }
+      },
+      { new: true }
+      ).populate([
+      {path: 'seenBy'},
+      {path: 'conversation'},
+    ]);
+    if (!message) throw new NotFoundException('No message found.');
+
+    const wasJustAdded = message.seenBy.some(
+      (user: any) => user._id.toString() === userId.toString()
+    );
+    if (!wasJustAdded) return;
+
+    const user = await this.userService.findOne(userId);
+
+    const responseUserDto = transformDto(ResponseUserDto , user);
+    this.messageGateway.handleSeenMessage(
+          message.conversation._id.toString(),
+          message._id.toString(),
+          {
+            seenById: user._id.toString(),
+            seenByName: user.name,
+            seenByAvatarUrl: user.avatar?.url
+          }
+        );
   }
+
+  // async markSeenMessage(id: string , currentUser: IUserPayload) {
+  //   const message = await this.findOne(id);
+  //   const user = await this.userService.findOne(currentUser._id);
+  //
+  //   const alreadySeen = message.seenBy.some(u => u?.toString() === currentUser._id);
+  //
+  //   if (!alreadySeen) {
+  //     message.seenBy.push(user);
+  //     await message.save();
+  //
+  //     const responseUserDto = plainToInstance(ResponseUserDto , user , {
+  //       excludeExtraneousValues: true,
+  //     });
+  //
+  //     this.messageGateway.handleSeenMessage(
+  //       message.conversation._id.toString(),
+  //       message._id.toString(),
+  //       {
+  //         seenById: user._id.toString(),
+  //         seenByName: user.name,
+  //         seenByAvatarUrl: user.avatar?.url
+  //       }
+  //     );
+  //   }
+  // }
 
 }

@@ -29,18 +29,23 @@ export class FriendGateway {
     this.server.to(recieverId).emit('send_fiend_request', data);
   }
 
-  handleAcceptRequest(data: {
-    friendRequestId: string;
-    _id: string;
-    name: string;
-    avatarUrl: string | null;
-  }) {
-    this.server.to(data._id).emit('accept_request', data);
+  handleAcceptRequest(
+    senderId: string,
+    data: ResponseFriendRequestDto,
+    whoEmitEventId: string,
+  ) {
+    this.server
+      .to(senderId).emit('accept_request', data , whoEmitEventId);
   }
 
-  handleRejectRequest(senderId: string, friendRequestId: string) {
-    this.server.to(senderId).emit('reject_friend_request', friendRequestId);
+  handleRejectRequest(senderId: string, friendRequestId: string,whoEmitEventId: string) {
+    this.server.to(senderId).emit('reject_friend_request', friendRequestId , whoEmitEventId);
   }
+
+  handleUnfriend(targetUserId: string , unFriendedId: string) {
+    this.server.to(targetUserId).emit('unfriend_request', unFriendedId);
+  }
+
   handleCancelRequest(receiverId : string, senderId: string , friendRequestId: string) {
     this.server
       .to(receiverId)

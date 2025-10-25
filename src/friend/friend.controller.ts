@@ -6,6 +6,7 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  Delete,
 } from '@nestjs/common';
 import { FriendService } from './friend.service';
 import { CurrentUser } from '../_cores/decorators/current-user.decorator';
@@ -31,6 +32,12 @@ export class FriendController {
   @TransformDto(ResponseFriendDto)
   canselFriendRequest(@CurrentUser() currentUser: IUserPayload ,@Param('receiverId' , ParseObjectIdPipe) receiverId: string) {
     return this.friendService.remove(currentUser , receiverId);
+  }
+
+  @Delete('/:friendId')
+  @TransformDto(ResponseFriendRequestDto)
+  unFriend(@CurrentUser() currentUser: IUserPayload , @Param('friendId' , ParseObjectIdPipe) friendId: string) {
+    return this.friendService.unFriend(currentUser , friendId);
   }
 
   @HttpCode(HttpStatus.OK)

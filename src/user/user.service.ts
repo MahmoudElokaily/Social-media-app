@@ -105,4 +105,19 @@ export class UserService {
   findUsersByIds(ids: string[]) {
     return this.userModel.find({ _id: { $in: ids } });
   }
+
+  async checkIsFriend(userId: string, friendId: string): Promise<boolean> {
+    const user = await this.userModel.findById(userId).select('friends');
+    if (!user) return false;
+    return user.friends.map((fr) => fr._id.toString()).includes(friendId);
+  }
+
+  async removeFriend(userId: string, friendId: string): Promise<void> {
+    await this.userModel.findByIdAndUpdate(userId,
+      {
+        $pull: {friends: friendId},
+      },
+      { new: true }
+    )
+  }
 }

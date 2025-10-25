@@ -57,6 +57,26 @@ export class FriendService {
     this.friendGateway.handleSendFriendRequest(receiverId , responseFriendRequestDro);
   }
 
+  async unFriend(currentUser: IUserPayload , friendId: string) {
+    const friend = await this.userService.findOne(friendId);
+    if (!friend) throw new NotFoundException('User not found');
+    if (currentUser._id.toString() === friend._id.toString()) throw new BadRequestException("You can't unfriend yourself");
+    const isFriend = await this.userService.checkIsFriend(currentUser._id , friend._id.toString());
+    if (!isFriend) throw new BadRequestException("You are not friends");
+    // remove friend from each others
+    await this.userService.removeFriend(currentUser._id , friend._id.toString());
+    await this.userService.removeFriend(friend._id.toString() , currentUser._id);
+    //Remove friendRequest
+    await this.friendModel.deleteOne({
+      $or: [
+        { sender: currentUser._id, receiver: friend._id , status: FriendRequestType.Accept },
+        { sender: friend._id, receiver: currentUser._id , status: FriendRequestType.Accept },
+      ],
+    });
+
+    this.friendGateway.handleUnfriend(friend._id.toString() , currentUser._id.toString());
+  }
+
   async acceptFriendRequest(currentUser: IUserPayload,friendRequestId: string) {
     const friendRequest = await this.friendModel.findById(friendRequestId).populate('sender' , 'name avatar');
     if (!friendRequest) throw new NotFoundException('Friend request does not exist');
@@ -68,13 +88,18 @@ export class FriendService {
 
     await this.userService.addFriend(friendRequest.sender._id.toString() , friendRequest.receiver._id.toString());
     await this.userService.addFriend(friendRequest.receiver._id.toString() , friendRequest.sender._id.toString());
-
-    this.friendGateway.handleAcceptRequest({
-      friendRequestId ,
-      _id: friendRequest.sender._id.toString(),
-      name: friendRequest.sender.name,
-      avatarUrl: friendRequest.sender?.avatar?.url ? friendRequest.sender.avatar?.url : null,
-    })
+    const responseFriendRequestDto = transformDto(ResponseFriendRequestDto , friendRequest);
+    // this.friendGateway.handleAcceptRequest({
+    //   friendRequestId ,
+    //   _id: friendRequest.sender._id.toString(),
+    //   name: friendRequest.sender.name,
+    //   avatarUrl: friendRequest.sender?.avatar?.url ? friendRequest.sender.avatar?.url : null,
+    // })
+    this.friendGateway.handleAcceptRequest(
+      friendRequest.sender._id.toString(),
+      responseFriendRequestDto,
+      currentUser._id
+    );
   }
   async rejectFriendRequest(currentUser: IUserPayload,friendRequestId: string) {
     const friendRequest = await this.friendModel.findById(friendRequestId);
@@ -85,7 +110,7 @@ export class FriendService {
     friendRequest.status = FriendRequestType.Reject;
 
     await friendRequest.save();
-    this.friendGateway.handleRejectRequest(friendRequest.sender._id.toString() , friendRequestId);
+    this.friendGateway.handleRejectRequest(friendRequest.sender._id.toString() , friendRequestId , currentUser._id);
 
   }
 

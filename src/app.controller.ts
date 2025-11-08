@@ -6,7 +6,11 @@ export class AppController {
   constructor(private readonly appService: AppService) {}
 
   @Get()
-  getHello(): string {
-    return this.appService.getHello();
+  health() {
+    return {
+      status: 'ok',
+      message: 'Server is healthy',
+      timestamp: new Date().toISOString(),
+    };
   }
 }
